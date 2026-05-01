@@ -1,261 +1,106 @@
 package dao;
 
-import connectDB.SQLConnection;
 import entity.KhuyenMai;
-
-import java.sql.*;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KhuyenMaiDAO {
+public class KhuyenMaiDAO extends BaseDAO {
 
     public void autoUpdateExpiredStatuses() {
-        String sql = "UPDATE KhuyenMai SET trangThai = N'Ngưng áp dụng' WHERE ngayKetThuc < ? AND trangThai = N'Đang áp dụng'";
-        try (Connection conn = SQLConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDate(1, Date.valueOf(LocalDate.now()));
-            ps.executeUpdate();
+        try {
+            inTransactionVoid(em ->
+                em.createNativeQuery("UPDATE KhuyenMai SET trangThai='Ngưng áp dụng' " +
+                        "WHERE ngayKetThuc < ? AND trangThai='Đang áp dụng'")
+                        .setParameter(1, java.sql.Date.valueOf(LocalDate.now())).executeUpdate());
         } catch (Exception e) { e.printStackTrace(); }
     }
 
     public List<KhuyenMai> getAllKhuyenMai() {
         autoUpdateExpiredStatuses();
-        List<KhuyenMai> dsKhuyenMai = new ArrayList<>();
-        String sql = "SELECT * FROM KhuyenMai";
-
-        try (Connection conn = SQLConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                try {
-                    String maKM = rs.getString("maKM");
-                    String tenKM = rs.getString("tenKM");
-                    String moTa = rs.getString("moTa");
-                    LocalDate ngayBD = rs.getDate("ngayBatDau").toLocalDate();
-                    LocalDate ngayKT = (rs.getDate("ngayKetThuc") != null) ? rs.getDate("ngayKetThuc").toLocalDate() : null;
-                    String loaiGiam = rs.getString("loaiGiam");
-                    double giaTriGiam = rs.getDouble("giaTriGiam");
-                    double dieuKien = rs.getDouble("dieuKienApDung");
-                    String trangThai = rs.getString("trangThai");
-
-                    KhuyenMai km = new KhuyenMai(maKM, tenKM, moTa, loaiGiam, giaTriGiam, dieuKien, ngayBD, ngayKT, trangThai);
-                    km.setSoLuongGioiHan(rs.getInt("soLuongGioiHan"));
-                    km.setSoLuotDaDung(rs.getInt("soLuotDaDung"));
-
-                    dsKhuyenMai.add(km);
-                } catch (Exception e) { e.printStackTrace(); }
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return dsKhuyenMai;
+        EntityManager em = getEM();
+        try {
+            return em.createQuery("FROM KhuyenMai", KhuyenMai.class).getResultList();
+        } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
+        finally { em.close(); }
     }
 
     public boolean themKhuyenMai(KhuyenMai km) {
-        String sql = "INSERT INTO KhuyenMai (maKM, tenKM, moTa, loaiGiam, giaTriGiam, ngayBatDau, ngayKetThuc, trangThai, dieuKienApDung, soLuongGioiHan, soLuotDaDung) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, km.getMaKM());
-            ps.setString(2, km.getTenChuongTrinh());
-            ps.setString(3, km.getMoTa());
-            ps.setString(4, km.getLoaiKhuyenMai());
-            ps.setDouble(5, km.getGiaTri());
-            ps.setDate(6, Date.valueOf(km.getNgayBatDau()));
-            if (km.getNgayKetThuc() != null) ps.setDate(7, Date.valueOf(km.getNgayKetThuc())); else ps.setNull(7, Types.DATE);
-            ps.setString(8, km.getTrangThai());
-            ps.setDouble(9, km.getDieuKienApDung());
-            ps.setInt(10, km.getSoLuongGioiHan());
-            ps.setInt(11, 0);
-
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        try { inTransactionVoid(em -> em.persist(km)); return true; }
+        catch (Exception e) { e.printStackTrace(); return false; }
     }
 
     public boolean updateKhuyenMai(KhuyenMai km) {
-        String sql = "UPDATE KhuyenMai SET tenKM=?, moTa=?, loaiGiam=?, giaTriGiam=?, ngayBatDau=?, ngayKetThuc=?, trangThai=?, dieuKienApDung=?, soLuongGioiHan=? WHERE maKM=?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, km.getTenChuongTrinh());
-            ps.setString(2, km.getMoTa());
-            ps.setString(3, km.getLoaiKhuyenMai());
-            ps.setDouble(4, km.getGiaTri());
-            ps.setDate(5, Date.valueOf(km.getNgayBatDau()));
-            if (km.getNgayKetThuc() != null) ps.setDate(6, Date.valueOf(km.getNgayKetThuc())); else ps.setNull(6, Types.DATE);
-            ps.setString(7, km.getTrangThai());
-            ps.setDouble(8, km.getDieuKienApDung());
-            ps.setInt(9, km.getSoLuongGioiHan());
-            ps.setString(10, km.getMaKM());
-
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        try { inTransactionVoid(em -> em.merge(km)); return true; }
+        catch (Exception e) { e.printStackTrace(); return false; }
     }
-
-
 
     public List<KhuyenMai> timKiemVaLoc(String tuKhoa, String trangThai) {
         autoUpdateExpiredStatuses();
-        List<KhuyenMai> dsKhuyenMai = new ArrayList<>();
-        String sql = "SELECT * FROM KhuyenMai WHERE 1=1";
-
-        if (tuKhoa != null && !tuKhoa.trim().isEmpty() && !tuKhoa.equals("Tìm kiếm khuyến mãi")) {
-            sql += " AND (maKM LIKE ? OR tenKM LIKE ?)";
-        }
-        if (trangThai != null && !trangThai.equals("Lọc khuyến mãi")) {
-            sql += " AND trangThai = ?";
-        }
-
-        try (Connection conn = SQLConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            int i = 1;
-            if (tuKhoa != null && !tuKhoa.trim().isEmpty() && !tuKhoa.equals("Tìm kiếm khuyến mãi")) {
-                ps.setString(i++, "%" + tuKhoa + "%");
-                ps.setString(i++, "%" + tuKhoa + "%");
-            }
-            if (trangThai != null && !trangThai.equals("Lọc khuyến mãi")) {
-                ps.setString(i++, trangThai);
-            }
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    String maKM = rs.getString("maKM");
-                    String tenKM = rs.getString("tenKM");
-                    String moTa = rs.getString("moTa");
-                    LocalDate ngayBD = rs.getDate("ngayBatDau").toLocalDate();
-                    LocalDate ngayKT = (rs.getDate("ngayKetThuc") != null) ? rs.getDate("ngayKetThuc").toLocalDate() : null;
-                    String loaiGiam = rs.getString("loaiGiam");
-                    double giaTriGiam = rs.getDouble("giaTriGiam");
-                    double dieuKien = rs.getDouble("dieuKienApDung");
-                    String tt = rs.getString("trangThai");
-
-                    KhuyenMai km = new KhuyenMai(maKM, tenKM, moTa, loaiGiam, giaTriGiam, dieuKien, ngayBD, ngayKT, tt);
-                    km.setSoLuongGioiHan(rs.getInt("soLuongGioiHan"));
-                    km.setSoLuotDaDung(rs.getInt("soLuotDaDung"));
-
-                    dsKhuyenMai.add(km);
-                }
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return dsKhuyenMai;
+        EntityManager em = getEM();
+        try {
+            boolean hasTuKhoa = tuKhoa != null && !tuKhoa.trim().isEmpty() && !tuKhoa.equals("Tìm kiếm khuyến mãi");
+            boolean hasTrangThai = trangThai != null && !trangThai.equals("Lọc khuyến mãi");
+            StringBuilder jpql = new StringBuilder("FROM KhuyenMai k WHERE 1=1");
+            if (hasTuKhoa)   jpql.append(" AND (k.maKM LIKE :kw OR k.tenChuongTrinh LIKE :kw)");
+            if (hasTrangThai) jpql.append(" AND k.trangThai = :tt");
+            jakarta.persistence.TypedQuery<KhuyenMai> q = em.createQuery(jpql.toString(), KhuyenMai.class);
+            if (hasTuKhoa)    q.setParameter("kw", "%" + tuKhoa + "%");
+            if (hasTrangThai) q.setParameter("tt", trangThai);
+            return q.getResultList();
+        } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
+        finally { em.close(); }
     }
-
 
     public KhuyenMai getKhuyenMaiHopLeByMa(String maKM) {
         autoUpdateExpiredStatuses();
-        String sql = "SELECT * FROM KhuyenMai WHERE maKM = ? AND trangThai = N'Đang áp dụng'";
-
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, maKM);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    LocalDate now = LocalDate.now();
-                    LocalDate ngayBD = rs.getDate("ngayBatDau").toLocalDate();
-                    Date dateKT = rs.getDate("ngayKetThuc");
-                    LocalDate ngayKT = (dateKT != null) ? dateKT.toLocalDate() : null;
-
-                    if (now.isBefore(ngayBD)) return null; // Chưa đến ngày
-                    if (ngayKT != null && now.isAfter(ngayKT)) return null; // Hết hạn
-
-                    // Tạo đối tượng
-                    String tenKM = rs.getString("tenKM");
-                    String moTa = rs.getString("moTa");
-                    String loaiGiam = rs.getString("loaiGiam");
-                    double giaTriGiam = rs.getDouble("giaTriGiam");
-                    double dieuKien = rs.getDouble("dieuKienApDung");
-                    String trangThai = rs.getString("trangThai");
-                    int slGioiHan = rs.getInt("soLuongGioiHan");
-                    int slDaDung = rs.getInt("soLuotDaDung");
-
-                    KhuyenMai km = new KhuyenMai(maKM, tenKM, moTa, loaiGiam, giaTriGiam, dieuKien, ngayBD, ngayKT, trangThai);
-                    km.setSoLuongGioiHan(slGioiHan);
-                    km.setSoLuotDaDung(slDaDung);
-
-                    return km;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        EntityManager em = getEM();
+        try {
+            List<KhuyenMai> r = em.createQuery(
+                    "FROM KhuyenMai k WHERE k.maKM=:ma AND k.trangThai='Đang áp dụng'", KhuyenMai.class)
+                    .setParameter("ma", maKM).getResultList();
+            if (r.isEmpty()) return null;
+            KhuyenMai km = r.get(0);
+            LocalDate now = LocalDate.now();
+            if (now.isBefore(km.getNgayBatDau())) return null;
+            if (km.getNgayKetThuc() != null && now.isAfter(km.getNgayKetThuc())) return null;
+            return km;
+        } finally { em.close(); }
     }
-
 
     public String kiemTraDieuKienSuDung(String maKM, String maKH, double tongTien) {
-        String sql = "SELECT soLuongGioiHan, soLuotDaDung, dieuKienApDung, trangThai, ngayBatDau, ngayKetThuc FROM KhuyenMai WHERE maKM = ?";
-        try (Connection conn = SQLConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, maKM);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    if (!rs.getString("trangThai").equals("Đang áp dụng")) return "Mã đã ngưng áp dụng.";
-
-                    LocalDate now = LocalDate.now();
-                    if (now.isBefore(rs.getDate("ngayBatDau").toLocalDate())) return "Chưa đến ngày áp dụng.";
-                    if (rs.getDate("ngayKetThuc") != null && now.isAfter(rs.getDate("ngayKetThuc").toLocalDate())) return "Mã đã hết hạn.";
-
-                    if (tongTien < rs.getDouble("dieuKienApDung")) return "Chưa đủ giá trị tối thiểu.";
-
-                    int limit = rs.getInt("soLuongGioiHan");
-                    int used = rs.getInt("soLuotDaDung");
-                    if (limit > 0 && used >= limit) return "Mã đã hết lượt sử dụng.";
-
-                    if (checkKhachHangDaDung(conn, maKM, maKH)) return "Khách hàng đã dùng mã này rồi.";
-
-                    return "OK";
-                }
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return "Lỗi kiểm tra.";
+        EntityManager em = getEM();
+        try {
+            List<KhuyenMai> r = em.createQuery("FROM KhuyenMai k WHERE k.maKM=:ma", KhuyenMai.class)
+                    .setParameter("ma", maKM).getResultList();
+            if (r.isEmpty()) return "Lỗi kiểm tra.";
+            KhuyenMai km = r.get(0);
+            if (!"Đang áp dụng".equals(km.getTrangThai())) return "Mã đã ngưng áp dụng.";
+            LocalDate now = LocalDate.now();
+            if (now.isBefore(km.getNgayBatDau())) return "Chưa đến ngày áp dụng.";
+            if (km.getNgayKetThuc() != null && now.isAfter(km.getNgayKetThuc())) return "Mã đã hết hạn.";
+            if (tongTien < km.getDieuKienApDung()) return "Chưa đủ giá trị tối thiểu.";
+            if (km.getSoLuongGioiHan() > 0 && km.getSoLuotDaDung() >= km.getSoLuongGioiHan())
+                return "Mã đã hết lượt sử dụng.";
+            long used = ((Number) em.createNativeQuery(
+                    "SELECT COUNT(*) FROM LichSuSuDungKM WHERE maKM=? AND maKH=?")
+                    .setParameter(1, maKM).setParameter(2, maKH).getSingleResult()).longValue();
+            if (used > 0) return "Khách hàng đã dùng mã này rồi.";
+            return "OK";
+        } catch (Exception e) { e.printStackTrace(); return "Lỗi kiểm tra."; }
+        finally { em.close(); }
     }
-
-    private boolean checkKhachHangDaDung(Connection conn, String maKM, String maKH) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM LichSuSuDungKM WHERE maKM = ? AND maKH = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, maKM);
-            ps.setString(2, maKH);
-            ResultSet rs = ps.executeQuery();
-            return rs.next() && rs.getInt(1) > 0;
-        }
-    }
-
 
     public void ghiNhanSuDung(String maKM, String maKH) {
-        Connection conn = null;
-        try {
-            conn = SQLConnection.getConnection();
-            conn.setAutoCommit(false);
-
-            String sqlUpdateCount = "UPDATE KhuyenMai SET soLuotDaDung = soLuotDaDung + 1 WHERE maKM = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sqlUpdateCount)) {
-                ps.setString(1, maKM);
-                ps.executeUpdate();
-            }
-
-            String sqlHist = "INSERT INTO LichSuSuDungKM (maKH, maKM) VALUES (?, ?)";
-            try (PreparedStatement ps = conn.prepareStatement(sqlHist)) {
-                ps.setString(1, maKH);
-                ps.setString(2, maKM);
-                ps.executeUpdate();
-            }
-
-            String sqlAutoStop = "UPDATE KhuyenMai SET trangThai = N'Ngưng áp dụng' " +
-                    "WHERE maKM = ? AND soLuongGioiHan > 0 AND soLuotDaDung >= soLuongGioiHan";
-            try (PreparedStatement ps = conn.prepareStatement(sqlAutoStop)) {
-                ps.setString(1, maKM);
-                int rowsAffected = ps.executeUpdate();
-                if (rowsAffected > 0) {
-                    System.out.println("Mã KM " + maKM + " đã đạt giới hạn và được chuyển sang 'Ngưng áp dụng'.");
-                }
-            }
-
-            conn.commit();
-        } catch (Exception e) {
-            try { if (conn != null) conn.rollback(); } catch (SQLException ex) {}
-            e.printStackTrace();
-        } finally {
-            try { if (conn != null) conn.close(); } catch (SQLException e) {}
-        }
+        inTransactionVoid(em -> {
+            em.createNativeQuery("UPDATE KhuyenMai SET soLuotDaDung=soLuotDaDung+1 WHERE maKM=?")
+                    .setParameter(1, maKM).executeUpdate();
+            em.createNativeQuery("INSERT INTO LichSuSuDungKM(maKH, maKM) VALUES(?,?)")
+                    .setParameter(1, maKH).setParameter(2, maKM).executeUpdate();
+            em.createNativeQuery("UPDATE KhuyenMai SET trangThai='Ngưng áp dụng' " +
+                    "WHERE maKM=? AND soLuongGioiHan>0 AND soLuotDaDung>=soLuongGioiHan")
+                    .setParameter(1, maKM).executeUpdate();
+        });
     }
 }

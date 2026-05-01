@@ -6,6 +6,9 @@ import entity.Ban;
 import entity.ChiTietHoaDon;
 import entity.DonDatMon;
 import entity.HoaDon;
+import socket.SocketClient;
+import socket.SocketEvent;
+import socket.SocketManager;
 import util.ExcelExporter;
 
 import javax.swing.*;
@@ -75,6 +78,7 @@ public class HoaDonGUI extends JPanel {
         this.donDatMonDAO = new DonDatMonDAO();
         this.banDAO = new BanDAO();
         this.dsHoaDonDisplayed = new ArrayList<>();
+        dangKySocketEvents();
 
         setLayout(new BorderLayout(10, 10));
         setBackground(COLOR_BG_LIGHT);
@@ -205,6 +209,13 @@ public class HoaDonGUI extends JPanel {
         }
 
         return new LocalDateTime[]{start, end};
+    }
+
+    private void dangKySocketEvents() {
+        SocketClient client = SocketManager.getClient();
+        if (client == null) return;
+        client.subscribe(SocketEvent.HOA_DON_THANH_TOAN, msg ->
+                SwingUtilities.invokeLater(this::loadDataForCurrentPage));
     }
 
     private void loadFirstPage() {

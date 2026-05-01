@@ -1,22 +1,48 @@
 package entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Entity
+@Table(name = "NhanVien")
 public class NhanVien {
 
+    @Id
+    @Column(name = "maNV", length = 20)
     private String manv;
+
+    @Column(name = "hoTen", nullable = false, length = 100)
     private String hoten;
+
+    @Column(name = "ngaySinh")
     private LocalDate ngaysinh;
+
+    @Column(name = "gioiTinh", nullable = false, length = 10)
     private String gioitinh;
+
+    @Column(name = "sdt", nullable = false, unique = true, length = 15)
     private String sdt;
+
+    @Column(name = "diaChi", length = 255)
     private String diachi;
+
+    @Column(name = "ngayVaoLam", nullable = false)
     private LocalDate ngayvaolam;
+
+    @Column(name = "luong", nullable = false)
     private float luong;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vaiTro", nullable = false, length = 20)
     private VaiTro vaiTro;
+
+    @Column(name = "tenTK", nullable = false, unique = true, length = 50)
     private String tenTK;
+
+    @Column(name = "email", unique = true, length = 100)
     private String email;
 
     public NhanVien() {
@@ -34,12 +60,12 @@ public class NhanVien {
     }
 
     public NhanVien(String hoTen, LocalDate ngaySinh, String gioiTinh, String sdt,
-                    String diaChi, LocalDate ngayVaoLam, float luong ,VaiTro vaiTro, String email) {
+                    String diaChi, LocalDate ngayVaoLam, float luong, VaiTro vaiTro, String email) {
         this(hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, vaiTro, "", email);
     }
 
     public NhanVien(String hoTen, LocalDate ngaySinh, String gioiTinh, String sdt,
-                    String diaChi, LocalDate ngayVaoLam, float luong ,VaiTro vaiTro, String tenTK, String email) {
+                    String diaChi, LocalDate ngayVaoLam, float luong, VaiTro vaiTro, String tenTK, String email) {
         setVaiTro(vaiTro);
         this.manv = phatSinhMaNV(vaiTro);
         setHoten(hoTen);
@@ -54,7 +80,7 @@ public class NhanVien {
     }
 
     public NhanVien(String maNV, String hoTen, LocalDate ngaySinh, String gioiTinh, String sdt,
-                    String diaChi, LocalDate ngayVaoLam, float luong ,VaiTro vaiTro, String email) {
+                    String diaChi, LocalDate ngayVaoLam, float luong, VaiTro vaiTro, String email) {
         this.manv = maNV;
         setVaiTro(vaiTro);
         setHoten(hoTen);
@@ -79,7 +105,7 @@ public class NhanVien {
         this.ngayvaolam = other.ngayvaolam;
         this.luong = other.luong;
         this.tenTK = other.tenTK;
-        this.email = other.email; // 🌟 THÊM
+        this.email = other.email;
     }
 
     public NhanVien(String maNV, String hoTen) {
@@ -88,146 +114,68 @@ public class NhanVien {
     }
 
     private String phatSinhMaNV(VaiTro vaiTro) {
-        String maVaiTro;
-        if (vaiTro == VaiTro.QUANLY) {
-            maVaiTro = "02";
-        } else {
-            maVaiTro = "01";
-        }
+        String maVaiTro = (vaiTro == VaiTro.QUANLY) ? "02" : "01";
         int soNgauNhien = ThreadLocalRandom.current().nextInt(100, 1000);
         return "NV" + maVaiTro + soNgauNhien;
     }
 
-    public String getManv() {
-        return manv;
-    }
+    public String getManv() { return manv; }
+    public void setManv(String manv) { this.manv = manv; }
 
-    public void setManv(String manv) {
-        this.manv = manv;
-    }
-
-    public String getHoten() {
-        return hoten;
-    }
-
+    public String getHoten() { return hoten; }
     public void setHoten(String hoten) {
-        if (hoten == null || hoten.trim().isEmpty()) {
-            throw new IllegalArgumentException("Họ tên không được rỗng");
-        }
-
-        String namePattern = "^[\\p{L} .'-]+$";
-
-        if (!hoten.trim().matches(namePattern)) {
-            throw new IllegalArgumentException("Họ tên không hợp lệ (Không được chứa số hoặc ký tự đặc biệt không được phép).");
-        }
-
+        if (hoten == null || hoten.trim().isEmpty()) throw new IllegalArgumentException("Họ tên không được rỗng");
+        if (!hoten.trim().matches("^[\\p{L} .'-]+$"))
+            throw new IllegalArgumentException("Họ tên không hợp lệ.");
         this.hoten = hoten.trim();
     }
 
-    public LocalDate getNgaysinh() {
-        return ngaysinh;
-    }
-
+    public LocalDate getNgaysinh() { return ngaysinh; }
     public void setNgaysinh(LocalDate ngaysinh) {
-        if (ngaysinh == null || Period.between(ngaysinh, LocalDate.now()).getYears() < 18) {
+        if (ngaysinh == null || Period.between(ngaysinh, LocalDate.now()).getYears() < 18)
             throw new IllegalArgumentException("Nhân viên phải >= 18 tuổi");
-        }
         this.ngaysinh = ngaysinh;
     }
 
-    public String getGioitinh() {
-        return gioitinh;
-    }
+    public String getGioitinh() { return gioitinh; }
+    public void setGioitinh(String gioitinh) { this.gioitinh = gioitinh; }
 
-    public void setGioitinh(String gioitinh) {
-        this.gioitinh = gioitinh;
-    }
-
-    public String getSdt() {
-        return sdt;
-    }
-
+    public String getSdt() { return sdt; }
     public void setSdt(String sdt) {
-        String sdtPattern = "^0\\d{9}$";
-        if (sdt == null || !sdt.matches(sdtPattern)) {
+        if (sdt == null || !sdt.matches("^0\\d{9}$"))
             throw new IllegalArgumentException("SĐT không hợp lệ (phải có 10 chữ số, bắt đầu bằng 0)");
-        }
         this.sdt = sdt;
     }
 
-    public String getDiachi() {
-        return diachi;
-    }
+    public String getDiachi() { return diachi; }
+    public void setDiachi(String diachi) { this.diachi = diachi; }
 
-    public void setDiachi(String diachi) {
-        this.diachi = diachi;
-    }
+    public LocalDate getNgayvaolam() { return ngayvaolam; }
+    public void setNgayvaolam(LocalDate ngayvaolam) { this.ngayvaolam = ngayvaolam; }
 
-    public LocalDate getNgayvaolam() {
-        return ngayvaolam;
-    }
-
-    public void setNgayvaolam(LocalDate ngayvaolam) {
-        this.ngayvaolam = ngayvaolam;
-    }
-
-    public float getLuong() {
-        return luong;
-    }
-
+    public float getLuong() { return luong; }
     public void setLuong(float luong) {
-        if (luong <= 0) {
-            throw new IllegalArgumentException("Lương phải > 0");
-        }
+        if (luong <= 0) throw new IllegalArgumentException("Lương phải > 0");
         this.luong = luong;
     }
 
-    public VaiTro getVaiTro() {
-        return vaiTro;
-    }
+    public VaiTro getVaiTro() { return vaiTro; }
+    public void setVaiTro(VaiTro vaiTro) { this.vaiTro = vaiTro; }
 
-    public void setVaiTro(VaiTro vaiTro) {
-        this.vaiTro = vaiTro;
-    }
+    public String getTenTK() { return tenTK; }
+    public void setTenTK(String tenTK) { this.tenTK = tenTK; }
 
-    public String getTenTK() {
-        return tenTK;
-    }
-
-    public void setTenTK(String tenTK) {
-        this.tenTK = tenTK;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
+    public String getEmail() { return email; }
     public void setEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email không được rỗng.");
-        }
-        String emailPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-        if (!email.trim().matches(emailPattern)) {
+        if (email == null || email.trim().isEmpty()) throw new IllegalArgumentException("Email không được rỗng.");
+        if (!email.trim().matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"))
             throw new IllegalArgumentException("Email không đúng định dạng.");
-        }
         this.email = email.trim();
     }
 
     @Override
     public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return "NhanVien{" +
-                "manv='" + manv + '\'' +
-                ", hoten='" + hoten + '\'' +
-                ", ngaysinh=" + ngaysinh.format(formatter) +
-                ", gioitinh='" + gioitinh + '\'' +
-                ", sdt='" + sdt + '\'' +
-                ", diachi='" + diachi + '\'' +
-                ", ngayvaolam=" + ngayvaolam.format(formatter) +
-                ", luong=" + luong +
-                ", vaiTro=" + vaiTro.name() +
-                ", tenTK='" + tenTK + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return "NhanVien{manv='" + manv + "', hoten='" + hoten + "', vaiTro=" + vaiTro + '}';
     }
 }

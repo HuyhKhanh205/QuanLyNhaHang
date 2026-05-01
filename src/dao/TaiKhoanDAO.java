@@ -1,79 +1,56 @@
 package dao;
 
-import connectDB.SQLConnection;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import jakarta.persistence.EntityManager;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class TaiKhoanDAO {
+public class TaiKhoanDAO extends BaseDAO {
 
-    public Map<String, String> checkLoginAndGetInfo(String tenTK, String plainPassword) throws RuntimeException {
-
+    public Map<String, String> checkLoginAndGetInfo(String tenTK, String plainPassword) {
         String cleanPassword = plainPassword.trim().toLowerCase();
         String cleanTenTK = tenTK.trim();
-        String inputHashedPassword = "hashed_" + cleanPassword.hashCode();
+        String inputHashed = "hashed_" + cleanPassword.hashCode();
 
-        String sql = "SELECT T.matKhau, T.trangThai, N.vaiTro, N.hoTen, N.maNV FROM TaiKhoan T " +
-                "JOIN NhanVien N ON T.tenTK = N.tenTK " +
-                "WHERE T.tenTK = ?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        EntityManager em = getEM();
+        try {
+            List<Object[]> rows = em.createNativeQuery(
+                    "SELECT T.matKhau, T.trangThai, N.vaiTro, N.hoTen, N.maNV " +
+                    "FROM TaiKhoan T JOIN NhanVien N ON T.tenTK = N.tenTK WHERE T.tenTK = ?")
+                    .setParameter(1, cleanTenTK).getResultList();
 
-            pstmt.setString(1, cleanTenTK);
+            if (rows.isEmpty()) return null;
+            Object[] row = rows.get(0);
+            String dbHashed = row[0].toString().trim();
+            int trangThai = ((Number) row[1]).intValue();
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    String dbHashedPassword = rs.getString("matKhau").trim();
+            if (!inputHashed.equals(dbHashed)) return null;
 
-                    int trangThai = rs.getInt("trangThai");
-
-                    if (inputHashedPassword.equals(dbHashedPassword)) {
-
-                        if (trangThai == 0) {
-                            Map<String, String> lockedInfo = new HashMap<>();
-                            lockedInfo.put("status", "LOCKED");
-                            return lockedInfo;
-                        }
-
-                        String vaiTro = rs.getString("vaiTro");
-                        String hoTen = rs.getString("hoTen");
-                        String maNV = rs.getString("maNV");
-
-                        Map<String, String> userInfo = new HashMap<>();
-                        userInfo.put("role", vaiTro);
-                        userInfo.put("name", hoTen);
-                        userInfo.put("maNV", maNV);
-                        return userInfo;
-                    }
-
-                }
+            if (trangThai == 0) {
+                Map<String, String> locked = new HashMap<>();
+                locked.put("status", "LOCKED");
+                return locked;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Lỗi truy vấn CSDL khi đăng nhập", e);
-        }
 
-        return null;
+            Map<String, String> info = new HashMap<>();
+            info.put("role",  row[2].toString());
+            info.put("name",  row[3].toString());
+            info.put("maNV",  row[4].toString());
+            return info;
+        } finally {
+            em.close();
+        }
     }
 
     public boolean updatePassword(String tenTK, String newPlainPassword) {
-        String sqlUpdatePass = "UPDATE TaiKhoan SET matKhau = ? WHERE tenTK = ?";
-        String cleanTenTK = tenTK.trim();
-
-        String hashedPass = "hashed_" + newPlainPassword.trim().toLowerCase().hashCode();
-
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement pstmtUpdatePass = conn.prepareStatement(sqlUpdatePass)) {
-
-            pstmtUpdatePass.setString(1, hashedPass);
-            pstmtUpdatePass.setString(2, cleanTenTK);
-
-            int rowsAffected = pstmtUpdatePass.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
+        String hashed = "hashed_" + newPlainPassword.trim().toLowerCase().hashCode();
+        try {
+            inTransactionVoid(em ->
+                em.createNativeQuery("UPDATE TaiKhoan SET matKhau = ? WHERE tenTK = ?")
+                    .setParameter(1, hashed).setParameter(2, tenTK.trim()).executeUpdate()
+            );
+            return true;
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

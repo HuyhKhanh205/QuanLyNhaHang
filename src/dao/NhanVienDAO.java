@@ -1,359 +1,125 @@
 package dao;
 
-import connectDB.SQLConnection;
 import entity.NhanVien;
 import entity.VaiTro;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NhanVienDAO {
-
-    private NhanVien mapResultSetToNhanVien(ResultSet rs) throws SQLException {
-        NhanVien nv = new NhanVien();
-        nv.setManv(rs.getString("manv"));
-        nv.setHoten(rs.getString("hoTen"));
-        nv.setNgaysinh(rs.getDate("ngaySinh").toLocalDate());
-        nv.setGioitinh(rs.getString("gioiTinh"));
-        nv.setSdt(rs.getString("sdt"));
-        nv.setDiachi(rs.getString("diaChi"));
-        nv.setNgayvaolam(rs.getDate("ngayVaoLam").toLocalDate());
-        nv.setLuong(rs.getFloat("luong"));
-        nv.setVaiTro(VaiTro.valueOf(rs.getString("vaiTro").toUpperCase().trim()));
-        nv.setTenTK(rs.getString("tenTK"));
-        nv.setEmail(rs.getString("email"));
-        return nv;
-    }
+public class NhanVienDAO extends BaseDAO {
 
     public List<NhanVien> getAllNhanVien() {
-        List<NhanVien> ds = new ArrayList<>();
-        String sql = "SELECT manv, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, vaiTro, tenTK, email FROM NhanVien";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                ds.add(mapResultSetToNhanVien(rs));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Lỗi truy vấn CSDL NhanVien: " + e.getMessage(), e);
-        }
-        return ds;
+        EntityManager em = getEM();
+        try {
+            return em.createQuery("FROM NhanVien", NhanVien.class).getResultList();
+        } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
+        finally { em.close(); }
     }
 
     public NhanVien getChiTietNhanVien(String maNV) {
-        String sql = "SELECT manv, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, vaiTro, tenTK, email FROM NhanVien WHERE maNV = ?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, maNV);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToNhanVien(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+        EntityManager em = getEM();
+        try { return em.find(NhanVien.class, maNV); }
+        finally { em.close(); }
     }
 
     public List<NhanVien> searchNhanVienByName(String keyword) {
-        List<NhanVien> ds = new ArrayList<>();
-        String sql = "SELECT manv, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, vaiTro, tenTK, email FROM NhanVien WHERE LOWER(hoTen) LIKE ?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, "%" + keyword.toLowerCase().trim() + "%");
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    ds.add(mapResultSetToNhanVien(rs));
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Lỗi truy vấn tìm kiếm NhanVien theo Tên: " + e.getMessage(), e);
-        }
-        return ds;
-    }
-
-
-    public String getEmailByTenTK(String tenTK) {
-        String sql = "SELECT email FROM NhanVien WHERE tenTK = ?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, tenTK.trim());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("email");
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    public boolean addNhanVienAndAccount(NhanVien nv, String tenTK, String plainPassword) {
-        Connection conn = null;
+        EntityManager em = getEM();
         try {
-            conn = SQLConnection.getConnection();
-            conn.setAutoCommit(false);
-
-            String sqlTK = "INSERT INTO TaiKhoan (tenTK, matKhau, trangThai) VALUES (?, ?, 1)";
-            String hashedPass = "hashed_" + plainPassword.trim().toLowerCase().hashCode();
-
-            try (PreparedStatement pstmtTK = conn.prepareStatement(sqlTK)) {
-                pstmtTK.setString(1, tenTK);
-                pstmtTK.setString(2, hashedPass);
-
-                if (pstmtTK.executeUpdate() == 0) {
-                    conn.rollback();
-                    return false;
-                }
-            }
-            String sqlNV = "INSERT INTO NhanVien (maNV, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, vaiTro, tenTK, email) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            try (PreparedStatement pstmtNV = conn.prepareStatement(sqlNV)) {
-                pstmtNV.setString(1, nv.getManv());
-                pstmtNV.setString(2, nv.getHoten());
-                pstmtNV.setDate(3, java.sql.Date.valueOf(nv.getNgaysinh()));
-                pstmtNV.setString(4, nv.getGioitinh());
-                pstmtNV.setString(5, nv.getSdt());
-                pstmtNV.setString(6, nv.getDiachi());
-                pstmtNV.setDate(7, java.sql.Date.valueOf(nv.getNgayvaolam()));
-                pstmtNV.setFloat(8, nv.getLuong());
-                pstmtNV.setString(9, nv.getVaiTro().name());
-                pstmtNV.setString(10, tenTK);
-                pstmtNV.setString(11, nv.getEmail());
-
-                if (pstmtNV.executeUpdate() == 0) {
-                    conn.rollback();
-                    return false;
-                }
-            }
-
-            conn.commit();
-            return true;
-        } catch (SQLException | IllegalArgumentException e) {
-            e.printStackTrace();
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            return false;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+            return em.createQuery("FROM NhanVien n WHERE LOWER(n.hoten) LIKE :kw", NhanVien.class)
+                    .setParameter("kw", "%" + keyword.toLowerCase().trim() + "%").getResultList();
+        } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
+        finally { em.close(); }
     }
 
-
-    public boolean updateNhanVienAndAccount(NhanVien nv, String oldTenTK, String newTenTK, String newPlainPassword) {
-        Connection conn = null;
-        boolean isSuccess = false;
+    public List<NhanVien> searchNhanVienBySdt(String keyword) {
+        EntityManager em = getEM();
         try {
-            conn = SQLConnection.getConnection();
-            conn.setAutoCommit(false);
-
-            if (!oldTenTK.equals(newTenTK)) {
-
-                String sqlUpdateNhanVienFK = "UPDATE NhanVien SET tenTK = ? WHERE maNV = ? AND tenTK = ?";
-                try (PreparedStatement pstmtUpdateNhanVienFK = conn.prepareStatement(sqlUpdateNhanVienFK)) {
-                    pstmtUpdateNhanVienFK.setString(1, newTenTK);
-                    pstmtUpdateNhanVienFK.setString(2, nv.getManv());
-                    pstmtUpdateNhanVienFK.setString(3, oldTenTK);
-                    if (pstmtUpdateNhanVienFK.executeUpdate() == 0) {
-                        throw new SQLException("Update NhanVien FK failed: tenTK was NOT updated.");
-                    }
-                }
-
-                String sqlUpdateTK = "UPDATE TaiKhoan SET tenTK = ? WHERE tenTK = ?";
-                try (PreparedStatement pstmtUpdateTK = conn.prepareStatement(sqlUpdateTK)) {
-                    pstmtUpdateTK.setString(1, newTenTK);
-                    pstmtUpdateTK.setString(2, oldTenTK);
-                    if (pstmtUpdateTK.executeUpdate() == 0) {
-                        throw new SQLException("Update TaiKhoan failed: could not change tenTK.");
-                    }
-                }
-            }
-
-            String sqlNV = "UPDATE NhanVien SET hoTen=?, ngaySinh=?, gioiTinh=?, sdt=?, diaChi=?, luong=?, vaiTro=?, tenTK=?, email=? WHERE maNV=?";
-            try (PreparedStatement pstmtNV = conn.prepareStatement(sqlNV)) {
-                pstmtNV.setString(1, nv.getHoten());
-                pstmtNV.setDate(2, java.sql.Date.valueOf(nv.getNgaysinh()));
-                pstmtNV.setString(3, nv.getGioitinh());
-                pstmtNV.setString(4, nv.getSdt());
-                pstmtNV.setString(5, nv.getDiachi());
-                pstmtNV.setFloat(6, nv.getLuong());
-                pstmtNV.setString(7, nv.getVaiTro().name());
-                pstmtNV.setString(8, newTenTK);
-                pstmtNV.setString(9, nv.getEmail());
-                pstmtNV.setString(10, nv.getManv());
-
-                if (pstmtNV.executeUpdate() == 0) throw new SQLException("Update NhanVien failed, no rows affected.");
-            }
-
-            if (newPlainPassword != null && !newPlainPassword.isEmpty()) {
-                String sqlUpdatePass = "UPDATE TaiKhoan SET matKhau = ? WHERE tenTK = ?";
-                String hashedPass = "hashed_" + newPlainPassword.trim().toLowerCase().hashCode();
-                try (PreparedStatement pstmtUpdatePass = conn.prepareStatement(sqlUpdatePass)) {
-                    pstmtUpdatePass.setString(1, hashedPass);
-                    pstmtUpdatePass.setString(2, newTenTK);
-                    if (pstmtUpdatePass.executeUpdate() == 0) throw new SQLException("Update MatKhau failed: could not update password.");
-                }
-            }
-
-            conn.commit();
-            isSuccess = true;
-        } catch (SQLException | IllegalArgumentException e) {
-            e.printStackTrace();
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return isSuccess;
+            return em.createQuery("FROM NhanVien n WHERE n.sdt LIKE :kw", NhanVien.class)
+                    .setParameter("kw", "%" + keyword.trim() + "%").getResultList();
+        } catch (Exception e) { e.printStackTrace(); return new ArrayList<>(); }
+        finally { em.close(); }
     }
 
     public String getTenNhanVienByMa(String maNV) {
-        String sql = "SELECT hoTen FROM NhanVien WHERE maNV = ?";
-        String tenNV = "N/A (Lỗi CSDL)";
-
-        if (maNV == null || maNV.trim().isEmpty()) {
-            return "N/A (Thiếu Mã NV)";
-        }
-
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, maNV);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    tenNV = rs.getString("hoTen");
-                } else {
-                    tenNV = "N/A (" + maNV + ")";
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return tenNV;
-    }
-    public List<NhanVien> searchNhanVienBySdt(String keyword) {
-        List<NhanVien> ds = new ArrayList<>();
-        String sql = "SELECT manv, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, vaiTro, tenTK, email FROM NhanVien WHERE sdt LIKE ?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, "%" + keyword.trim() + "%");
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    ds.add(mapResultSetToNhanVien(rs));
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Lỗi truy vấn tìm kiếm NhanVien theo SĐT: " + e.getMessage(), e);
-        }
-        return ds;
-    }
-    public boolean suspendNhanVienAndAccount(String maNV, String tenTK, VaiTro vaiTro) {
-        Connection conn = null;
+        EntityManager em = getEM();
         try {
-            conn = SQLConnection.getConnection();
-            conn.setAutoCommit(false);
+            List<String> r = em.createQuery("SELECT n.hoten FROM NhanVien n WHERE n.manv = :ma", String.class)
+                    .setParameter("ma", maNV).getResultList();
+            return r.isEmpty() ? "N/A (" + maNV + ")" : r.get(0);
+        } finally { em.close(); }
+    }
 
-            if (vaiTro != VaiTro.NHANVIEN) {
-                throw new IllegalArgumentException("Chỉ có thể tạm ngưng nhân viên có Vai trò NHANVIEN.");
-            }
+    public String getEmailByTenTK(String tenTK) {
+        EntityManager em = getEM();
+        try {
+            List<String> r = em.createQuery("SELECT n.email FROM NhanVien n WHERE n.tenTK = :tk", String.class)
+                    .setParameter("tk", tenTK.trim()).getResultList();
+            return r.isEmpty() ? null : r.get(0);
+        } finally { em.close(); }
+    }
 
-            String sqlUpdateTK = "UPDATE TaiKhoan SET trangThai = 0 WHERE tenTK = ?";
-            try (PreparedStatement pstmtTK = conn.prepareStatement(sqlUpdateTK)) {
-                pstmtTK.setString(1, tenTK);
-                if (pstmtTK.executeUpdate() == 0) {
-                    throw new SQLException("Vô hiệu hóa Tài khoản thất bại hoặc Tài khoản không tồn tại.");
-                }
-            }
-
-
-            conn.commit();
+    public boolean addNhanVienAndAccount(NhanVien nv, String tenTK, String plainPassword) {
+        String hashed = "hashed_" + plainPassword.trim().toLowerCase().hashCode();
+        try {
+            inTransactionVoid(em -> {
+                em.createNativeQuery(
+                        "INSERT INTO TaiKhoan(tenTK, matKhau, trangThai) VALUES(?, ?, 1)")
+                        .setParameter(1, tenTK).setParameter(2, hashed).executeUpdate();
+                nv.setTenTK(tenTK);
+                em.persist(nv);
+            });
             return true;
-        } catch (SQLException | IllegalArgumentException e) {
-            e.printStackTrace();
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            return false;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        } catch (Exception e) { e.printStackTrace(); return false; }
     }
-    public int getAccountStatus(String tenTK) {
-        String sql = "SELECT trangThai FROM TaiKhoan WHERE tenTK = ?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, tenTK.trim());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("trangThai");
+    public boolean updateNhanVienAndAccount(NhanVien nv, String oldTenTK, String newTenTK, String newPlainPassword) {
+        try {
+            inTransactionVoid(em -> {
+                if (!oldTenTK.equals(newTenTK)) {
+                    em.createNativeQuery("UPDATE NhanVien SET tenTK = ? WHERE maNV = ? AND tenTK = ?")
+                            .setParameter(1, newTenTK).setParameter(2, nv.getManv())
+                            .setParameter(3, oldTenTK).executeUpdate();
+                    em.createNativeQuery("UPDATE TaiKhoan SET tenTK = ? WHERE tenTK = ?")
+                            .setParameter(1, newTenTK).setParameter(2, oldTenTK).executeUpdate();
                 }
-            }
-        } catch (SQLException e) {
-        }
-        return -1;
+                nv.setTenTK(newTenTK);
+                em.merge(nv);
+                if (newPlainPassword != null && !newPlainPassword.isEmpty()) {
+                    String hashed = "hashed_" + newPlainPassword.trim().toLowerCase().hashCode();
+                    em.createNativeQuery("UPDATE TaiKhoan SET matKhau = ? WHERE tenTK = ?")
+                            .setParameter(1, hashed).setParameter(2, newTenTK).executeUpdate();
+                }
+            });
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
     }
+
+    public boolean suspendNhanVienAndAccount(String maNV, String tenTK, VaiTro vaiTro) {
+        if (vaiTro != VaiTro.NHANVIEN)
+            throw new IllegalArgumentException("Chỉ có thể tạm ngưng nhân viên có Vai trò NHANVIEN.");
+        try {
+            inTransactionVoid(em ->
+                em.createNativeQuery("UPDATE TaiKhoan SET trangThai = 0 WHERE tenTK = ?")
+                        .setParameter(1, tenTK).executeUpdate());
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
     public boolean activateNhanVienAccount(String tenTK) {
-        String sqlUpdateTK = "UPDATE TaiKhoan SET trangThai = 1 WHERE tenTK = ?";
-        try (Connection conn = SQLConnection.getConnection();
-             PreparedStatement pstmtTK = conn.prepareStatement(sqlUpdateTK)) {
+        try {
+            inTransactionVoid(em ->
+                em.createNativeQuery("UPDATE TaiKhoan SET trangThai = 1 WHERE tenTK = ?")
+                        .setParameter(1, tenTK).executeUpdate());
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
 
-            pstmtTK.setString(1, tenTK);
-            return pstmtTK.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+    public int getAccountStatus(String tenTK) {
+        EntityManager em = getEM();
+        try {
+            List<?> r = em.createNativeQuery("SELECT trangThai FROM TaiKhoan WHERE tenTK = ?")
+                    .setParameter(1, tenTK.trim()).getResultList();
+            return r.isEmpty() ? -1 : ((Number) r.get(0)).intValue();
+        } finally { em.close(); }
     }
 }

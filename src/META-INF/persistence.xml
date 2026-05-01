@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0"
+             xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+             https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+
+    <persistence-unit name="QuanLyNhaHangPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>entity.Ban</class>
+        <class>entity.TaiKhoan</class>
+        <class>entity.NhanVien</class>
+        <class>entity.KhachHang</class>
+        <class>entity.DanhMucMon</class>
+        <class>entity.MonAn</class>
+        <class>entity.CaLam</class>
+        <class>entity.DonDatMon</class>
+        <class>entity.ChiTietHoaDon</class>
+        <class>entity.ChiTietHoaDonId</class>
+        <class>entity.HoaDon</class>
+        <class>entity.KhuyenMai</class>
+        <class>entity.PhanCong</class>
+        <class>entity.PhanCongId</class>
+        <class>entity.GiaoCa</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <!-- Kết nối MariaDB (override bởi AppConfig lúc runtime) -->
+            <property name="jakarta.persistence.jdbc.driver"
+                      value="org.mariadb.jdbc.Driver"/>
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:mariadb://localhost:3306/StarGuardianDB?useUnicode=true&amp;characterEncoding=utf8mb4&amp;serverTimezone=Asia/Ho_Chi_Minh"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+
+            <!-- Hibernate dialect -->
+            <property name="hibernate.dialect"
+                      value="org.hibernate.dialect.MariaDBDialect"/>
+
+            <!-- Validate schema khi khởi động (fail-fast nếu schema sai) -->
+            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+
+            <!-- Tắt show SQL trong production; bật khi debug -->
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
+
+            <!-- Connection pool cơ bản (dùng built-in Hibernate pool) -->
+            <property name="hibernate.connection.pool_size" value="10"/>
+
+            <!-- Hỗ trợ LocalDate/LocalDateTime của Java 8+ -->
+            <property name="hibernate.type.preferred_instant_jdbc_type" value="TIMESTAMP"/>
+        </properties>
+    </persistence-unit>
+</persistence>

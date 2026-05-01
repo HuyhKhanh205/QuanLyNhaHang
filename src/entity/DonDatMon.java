@@ -1,24 +1,41 @@
 package entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
+@Entity
+@Table(name = "DonDatMon")
 public class DonDatMon {
 
+    @Id
+    @Column(name = "maDon", length = 20)
     private String maDon;
+
+    @Column(name = "ngayKhoiTao", nullable = false)
     private LocalDateTime ngayKhoiTao;
-    private String maNV;
-    private String maKH;
+
+    @Column(name = "thoiGianDen")
     private LocalDateTime thoiGianDen;
+
+    @Column(name = "trangThai", nullable = false, length = 50)
     private String trangThai;
+
+    @Column(name = "maNV", nullable = false, length = 20)
+    private String maNV;
+
+    @Column(name = "maKH", length = 20)
+    private String maKH;
+
+    @Column(name = "maBan", length = 10)
     private String maBan;
+
+    @Column(name = "ghiChu", columnDefinition = "TEXT")
     private String ghiChu;
 
     private String generateMaDon() {
-        Random rand = new Random();
-        int xxxx = rand.nextInt(9000) + 1000;
-        return "DON" + xxxx;
+        return "DON" + (new Random().nextInt(9000) + 1000);
     }
 
     public DonDatMon() {
@@ -26,7 +43,9 @@ public class DonDatMon {
         this.ngayKhoiTao = LocalDateTime.now();
         this.ghiChu = "";
     }
-    public DonDatMon(String maDon, LocalDateTime ngayKhoiTao, String maNV, String maKH, String maBan, String ghiChu) {
+
+    public DonDatMon(String maDon, LocalDateTime ngayKhoiTao, String maNV,
+                     String maKH, String maBan, String ghiChu) {
         setMaDon(maDon);
         setNgayKhoiTao(ngayKhoiTao);
         setMaNV(maNV);
@@ -35,70 +54,42 @@ public class DonDatMon {
         setGhiChu(ghiChu);
     }
 
-    public DonDatMon(DonDatMon donDatMon) {
-        this.maDon = donDatMon.maDon;
-        this.ngayKhoiTao = donDatMon.ngayKhoiTao;
-        this.maNV = donDatMon.maNV;
-        this.maKH = donDatMon.maKH;
-        this.maBan = donDatMon.maBan;
-        this.ghiChu = donDatMon.ghiChu;
+    public DonDatMon(DonDatMon d) {
+        this.maDon = d.maDon;
+        this.ngayKhoiTao = d.ngayKhoiTao;
+        this.maNV = d.maNV;
+        this.maKH = d.maKH;
+        this.maBan = d.maBan;
+        this.ghiChu = d.ghiChu;
     }
 
-    public String getGhiChu() { return ghiChu; }
-    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
-    public String getMaDon() {
-        return maDon;
-    }
+    public String getMaDon()                        { return maDon; }
+    public LocalDateTime getNgayKhoiTao()           { return ngayKhoiTao; }
+    public LocalDateTime getThoiGianDen()           { return thoiGianDen; }
+    public String getTrangThai()                    { return trangThai; }
+    public String getMaNV()                         { return maNV; }
+    public String getMaKH()                         { return maKH; }
+    public String getMaBan()                        { return maBan; }
+    public String getGhiChu()                       { return ghiChu; }
 
-    public LocalDateTime getNgayKhoiTao() {
-        return ngayKhoiTao;
-    }
-    public LocalDateTime getThoiGianDen() {
-        return thoiGianDen;
-    }
-
-    public void setThoiGianDen(LocalDateTime thoiGianDen) {
-        this.thoiGianDen = thoiGianDen;
-    }
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-    }
-
-    public void setMaDon(String maDon) throws IllegalArgumentException {
-        if (maDon == null || maDon.trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã đơn không được rỗng.");
-        }
+    public void setMaDon(String maDon) {
+        if (maDon == null || maDon.trim().isEmpty()) throw new IllegalArgumentException("Mã đơn không được rỗng.");
         this.maDon = maDon;
     }
-
-    public void setNgayKhoiTao(LocalDateTime ngayKhoiTao) throws IllegalArgumentException {
-        if (ngayKhoiTao == null) {
-            throw new IllegalArgumentException("Ngày khởi tạo không được rỗng.");
-        }
+    public void setNgayKhoiTao(LocalDateTime ngayKhoiTao) {
+        if (ngayKhoiTao == null) throw new IllegalArgumentException("Ngày khởi tạo không được rỗng.");
         this.ngayKhoiTao = ngayKhoiTao;
     }
+    public void setThoiGianDen(LocalDateTime thoiGianDen)   { this.thoiGianDen = thoiGianDen; }
+    public void setTrangThai(String trangThai)               { this.trangThai = trangThai; }
+    public void setMaNV(String maNV)                         { this.maNV = maNV; }
+    public void setMaKH(String maKH)                         { this.maKH = maKH; }
+    public void setMaBan(String maBan)                       { this.maBan = maBan; }
+    public void setGhiChu(String ghiChu)                     { this.ghiChu = ghiChu; }
 
-    public String getMaNV() { return maNV; }
-    public void setMaNV(String maNV) { this.maNV = maNV; }
-    public String getMaKH() { return maKH; }
-    public void setMaKH(String maKH) { this.maKH = maKH; }
-    public String getMaBan() { return maBan; }
-    public void setMaBan(String maBan) { this.maBan = maBan; }
     @Override
     public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
-        String ngayStr = (this.ngayKhoiTao != null) ? this.ngayKhoiTao.format(formatter) : "null";
-
-        return "DonDatMon{" +
-                "maDon='" + maDon + '\'' +
-                ", ngayKhoiTao='" + ngayStr + '\'' +
-                ", maKH='" + maKH + '\'' +
-                ", maBan='" + maBan + '\'' +
-                ", ghiChu='" + ghiChu + '\'' +
-                '}';
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
+        return "DonDatMon{maDon='" + maDon + "', maBan='" + maBan + "', ghiChu='" + ghiChu + "'}";
     }
 }

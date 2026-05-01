@@ -1,23 +1,39 @@
 package entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Objects;
 
+@Entity
+@Table(name = "Ban")
 public class Ban {
     private static int soThuTuBan = 1;
 
+    @Id
+    @Column(name = "maBan", length = 10)
     private String maBan;
+
+    @Column(name = "tenBan", nullable = false, length = 50)
     private String tenBan;
+
+    @Column(name = "soGhe", nullable = false)
     private int soGhe;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trangThai", nullable = false, length = 20)
     private TrangThaiBan trangThai;
+
+    @Column(name = "gioMoBan")
     private LocalDateTime gioMoBan;
+
+    @Column(name = "khuVuc", nullable = false, length = 50)
     private String khuVuc;
 
     public static void setSoThuTuBanHienTai(int maxSoThuTu) {
         soThuTuBan = maxSoThuTu + 1;
     }
+
     public Ban(String maBan, String tenBan, int soGhe, TrangThaiBan trangThai, LocalDateTime gioMoBan, String khuVuc) {
         this.maBan = maBan;
         this.tenBan = tenBan;
@@ -26,6 +42,7 @@ public class Ban {
         this.gioMoBan = gioMoBan;
         this.khuVuc = khuVuc;
     }
+
     public Ban() {
         this.maBan = phatSinhMaBan();
         this.tenBan = "Chưa đặt tên";
@@ -57,18 +74,10 @@ public class Ban {
         return String.format("BAN%02d", soThuTuBan++);
     }
 
-    public String getMaBan() {
-        return maBan;
-    }
+    public String getMaBan() { return maBan; }
+    private void setMaBan(String maBan) { this.maBan = maBan; }
 
-    private void setMaBan(String maBan) {
-        this.maBan = maBan;
-    }
-
-    public String getTenBan() {
-        return tenBan;
-    }
-
+    public String getTenBan() { return tenBan; }
     public void setTenBan(String tenBan) {
         if (tenBan == null || tenBan.trim().isEmpty()) {
             throw new IllegalArgumentException("Tên bàn không được rỗng");
@@ -76,29 +85,16 @@ public class Ban {
         this.tenBan = tenBan;
     }
 
-    public int getSoGhe() {
-        return soGhe;
-    }
-
+    public int getSoGhe() { return soGhe; }
     public void setSoGhe(int soGhe) {
-        if (soGhe <= 0) {
-            throw new IllegalArgumentException("Số ghế phải > 0");
-        }
+        if (soGhe <= 0) throw new IllegalArgumentException("Số ghế phải > 0");
         this.soGhe = soGhe;
     }
 
-    public TrangThaiBan getTrangThai() {
-        return trangThai;
-    }
+    public TrangThaiBan getTrangThai() { return trangThai; }
+    public void setTrangThai(TrangThaiBan trangThai) { this.trangThai = trangThai; }
 
-    public void setTrangThai(TrangThaiBan trangThai) {
-        this.trangThai = trangThai;
-    }
-
-    public LocalDateTime getGioMoBan() {
-        return gioMoBan;
-    }
-
+    public LocalDateTime getGioMoBan() { return gioMoBan; }
     public void setGioMoBan(LocalDateTime gioMoBan) {
         if (this.trangThai == TrangThaiBan.DA_DAT_TRUOC) {
             if (gioMoBan == null || !gioMoBan.isAfter(LocalDateTime.now())) {
@@ -107,13 +103,12 @@ public class Ban {
         }
         this.gioMoBan = gioMoBan;
     }
-    public String getKhuVuc() {
-        return khuVuc;
-    }
 
+    public String getKhuVuc() { return khuVuc; }
     public void setKhuVuc(String khuVuc) {
         if (khuVuc == null || khuVuc.trim().isEmpty()) {
             this.khuVuc = "Chưa phân loại";
+            return;
         }
         this.khuVuc = khuVuc;
     }
@@ -121,14 +116,11 @@ public class Ban {
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
-        return "Ban{" +
-                "maBan='" + maBan + '\'' +
-                ", tenBan='" + tenBan + '\'' +
-                ", soGhe=" + soGhe +
-                ", trangThai='" + trangThai + '\'' +
-                ", gioMoBan='" + gioMoBan.format(formatter) + '\'' +
-                '}';
+        return "Ban{maBan='" + maBan + "', tenBan='" + tenBan + "', soGhe=" + soGhe +
+                ", trangThai='" + trangThai + "', gioMoBan='" +
+                (gioMoBan != null ? gioMoBan.format(formatter) : "null") + "'}";
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -138,8 +130,5 @@ public class Ban {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(maBan);
-    }
-
+    public int hashCode() { return Objects.hash(maBan); }
 }

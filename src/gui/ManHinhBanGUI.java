@@ -2,6 +2,9 @@ package gui;
 
 import dao.*;
 import entity.*;
+import socket.SocketClient;
+import socket.SocketEvent;
+import socket.SocketManager;
 import java.time.format.DateTimeFormatter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -65,6 +68,18 @@ public class ManHinhBanGUI extends JPanel {
         this.maKhuyenMaiDAO = new KhuyenMaiDAO();
         buildUI();
         khoiTaoTuDongCapNhat();
+        dangKySocketEvents();
+    }
+
+    private void dangKySocketEvents() {
+        SocketClient client = SocketManager.getClient();
+        if (client == null) return;
+        client.subscribe(SocketEvent.TABLE_STATUS_CHANGED, msg ->
+                SwingUtilities.invokeLater(this::refreshTableList));
+        client.subscribe(SocketEvent.HOA_DON_THANH_TOAN, msg ->
+                SwingUtilities.invokeLater(this::refreshTableList));
+        client.subscribe(SocketEvent.ORDER_CREATED, msg ->
+                SwingUtilities.invokeLater(this::refreshTableList));
     }
 
     private void khoiTaoTuDongCapNhat() {
