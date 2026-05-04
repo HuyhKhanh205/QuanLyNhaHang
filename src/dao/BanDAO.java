@@ -79,14 +79,20 @@ public class BanDAO extends BaseDAO {
         EntityManager em = getEM();
         try {
             Map<String, Integer> counts = new HashMap<>();
-            counts.put("TRONG", 0);
-            counts.put("DANG_PHUC_VU", 0);
-            counts.put("DA_DAT_TRUOC", 0);
+            counts.put("Trống", 0);
+            counts.put("Đang có khách", 0);
+            counts.put("Đã đặt trước", 0);
             List<Object[]> rows = em.createQuery(
                     "SELECT b.trangThai, COUNT(b) FROM Ban b GROUP BY b.trangThai", Object[].class)
                     .getResultList();
             for (Object[] row : rows) {
-                if (row[0] != null) counts.put(row[0].toString(), ((Long) row[1]).intValue());
+                if (row[0] == null) continue;
+                String key = switch (row[0].toString()) {
+                    case "DANG_PHUC_VU" -> "Đang có khách";
+                    case "DA_DAT_TRUOC"  -> "Đã đặt trước";
+                    default              -> "Trống";
+                };
+                counts.put(key, ((Long) row[1]).intValue());
             }
             return counts;
         } finally {

@@ -44,8 +44,6 @@ public class PhanCongDAO extends BaseDAO {
     public boolean themPhanCong(String maNV, String maCa, LocalDate ngayLam) {
         try {
             inTransactionVoid(em -> {
-                PhanCong pc = new PhanCong();
-                pc.getId(); // init
                 em.createNativeQuery("INSERT INTO PhanCongCa(maNV, maCa, ngayLam) VALUES(?,?,?)")
                         .setParameter(1, maNV).setParameter(2, maCa)
                         .setParameter(3, java.sql.Date.valueOf(ngayLam)).executeUpdate();

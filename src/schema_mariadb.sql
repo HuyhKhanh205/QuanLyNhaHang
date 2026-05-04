@@ -87,8 +87,7 @@ CREATE TABLE IF NOT EXISTS KhachHang (
 );
 
 -- Unique index cho email (chỉ khi email IS NOT NULL)
-CREATE UNIQUE INDEX UQ_KhachHang_Email ON KhachHang (email)
-    ALGORITHM = INPLACE LOCK = NONE;
+CREATE UNIQUE INDEX UQ_KhachHang_Email ON KhachHang (email);
 
 -- =====================================================
 -- Employee tables
