@@ -13,6 +13,8 @@
 | EntityManager leak (không close) | ✅ Không có |
 | Import `Map` thiếu | ✅ Đầy đủ |
 | Enum TrangThaiBan trong native SQL | ✅ Dùng TRONG/DANG_PHUC_VU/DA_DAT_TRUOC đúng |
+
+
 | DonDatMon/HoaDon trangThai | ✅ Vẫn dùng tiếng Việt đúng (STRING field) |
 | Column index mapping DAO → Entity | ✅ Khớp |
 

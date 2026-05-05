@@ -334,6 +334,26 @@ public class ManHinhGoiMonGUI extends JPanel {
         if (client == null) return;
         client.subscribe(SocketEvent.MENU_UPDATED, msg ->
                 SwingUtilities.invokeLater(this::loadDataFromDB));
+        client.subscribe(SocketEvent.ORDER_CREATED, msg ->
+                SwingUtilities.invokeLater(this::reloadActiveOrder));
+        client.subscribe(SocketEvent.ORDER_UPDATED, msg ->
+                SwingUtilities.invokeLater(this::reloadActiveOrder));
+    }
+
+    private void reloadActiveOrder() {
+        if (banHienTai == null || activeHoaDon == null) return;
+        List<ChiTietHoaDon> dsChiTiet = chiTietDAO.getChiTietTheoMaDon(activeHoaDon.getMaDon());
+        activeHoaDon.setDsChiTiet(dsChiTiet);
+        modelChiTietHoaDon.setRowCount(0);
+        if (dsChiTiet != null) {
+            for (ChiTietHoaDon ct : dsChiTiet) {
+                modelChiTietHoaDon.addRow(new Object[]{
+                        "X", ct.getMaMon(), ct.getTenMon(),
+                        ct.getSoluong(), ct.getDongia(), ct.getThanhtien()
+                });
+            }
+        }
+        updateBillPanelTotals();
     }
 
     private void loadDataFromDB() {

@@ -206,7 +206,7 @@ public class DanhSachBanGUI extends JPanel implements ActionListener {
 
     private void showGhepBanSplitDialog() {
         Window parentFrame = SwingUtilities.getWindowAncestor(this);
-         GhepBanDialog dialog = new GhepBanDialog(parentFrame);
+         GhepBanDialog dialog = new GhepBanDialog(parentFrame, this.maNVDangNhap);
          dialog.setVisible(true);
         if (manHinhBanGUI != null) {
             System.out.println("Đang làm mới danh sách bàn sau khi ghép...");

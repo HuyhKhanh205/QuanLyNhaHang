@@ -140,7 +140,7 @@ public class BanDAO extends BaseDAO {
         return ok;
     }
 
-    public boolean ghepBanLienKet(List<Ban> listBanNguon, Ban banDich) {
+    public boolean ghepBanLienKet(List<Ban> listBanNguon, Ban banDich, String maNVDangNhap) {
         boolean ok = inTransaction(em -> {
             boolean coKhach = (banDich.getTrangThai() == TrangThaiBan.DANG_PHUC_VU);
             for (Ban b : listBanNguon) {
@@ -161,8 +161,9 @@ public class BanDAO extends BaseDAO {
                 maDonDich = "DON" + System.currentTimeMillis();
                 em.createNativeQuery(
                         "INSERT INTO DonDatMon(maDon, ngayKhoiTao, thoiGianDen, maNV, maBan, trangThai) " +
-                        "VALUES(?, NOW(), NOW(), 'NV01102', ?, 'Chưa thanh toán')")
-                        .setParameter(1, maDonDich).setParameter(2, banDich.getMaBan()).executeUpdate();
+                        "VALUES(?, NOW(), NOW(), ?, ?, 'Chưa thanh toán')")
+                        .setParameter(1, maDonDich).setParameter(2, maNVDangNhap)
+                        .setParameter(3, banDich.getMaBan()).executeUpdate();
             }
 
             for (Ban bNguon : listBanNguon) {
@@ -217,9 +218,10 @@ public class BanDAO extends BaseDAO {
                 String dummyID = "L" + (System.currentTimeMillis() % 100000000) + bNguon.getMaBan();
                 em.createNativeQuery(
                         "INSERT INTO DonDatMon(maDon, ngayKhoiTao, thoiGianDen, maNV, maBan, trangThai, ghiChu) " +
-                        "VALUES(?, NOW(), NOW(), 'NV01102', ?, 'Chưa thanh toán', ?)")
-                        .setParameter(1, dummyID).setParameter(2, bNguon.getMaBan())
-                        .setParameter(3, "LINKED:" + banDich.getMaBan()).executeUpdate();
+                        "VALUES(?, NOW(), NOW(), ?, ?, 'Chưa thanh toán', ?)")
+                        .setParameter(1, dummyID).setParameter(2, maNVDangNhap)
+                        .setParameter(3, bNguon.getMaBan())
+                        .setParameter(4, "LINKED:" + banDich.getMaBan()).executeUpdate();
 
                 em.createNativeQuery("UPDATE Ban SET trangThai = ? WHERE maBan = ?")
                         .setParameter(1, ttSauGop).setParameter(2, bNguon.getMaBan()).executeUpdate();

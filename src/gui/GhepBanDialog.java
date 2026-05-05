@@ -27,9 +27,11 @@ public class GhepBanDialog extends JDialog {
     private List<BanPanel> leftBanPanelList = new ArrayList<>();
     private List<BanPanel> rightBanPanelList = new ArrayList<>();
     private BanDAO banDAO;
+    private final String maNVDangNhap;
 
-    public GhepBanDialog(Window parent) {
+    public GhepBanDialog(Window parent, String maNVDangNhap) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        this.maNVDangNhap = maNVDangNhap;
         this.banDAO = new BanDAO();
 
         try {
@@ -282,7 +284,7 @@ public class GhepBanDialog extends JDialog {
             return;
         }
 
-        boolean kq = banDAO.ghepBanLienKet(selectedSourceTables, selectedTargetTable);
+        boolean kq = banDAO.ghepBanLienKet(selectedSourceTables, selectedTargetTable, maNVDangNhap);
 
         if (kq) {
             JOptionPane.showMessageDialog(this, "Ghép bàn thành công!\nTất cả hóa đơn đã dồn về bàn " + selectedTargetTable.getTenBan(), "Thông báo", JOptionPane.INFORMATION_MESSAGE);

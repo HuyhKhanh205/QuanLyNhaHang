@@ -130,8 +130,9 @@ public class HoaDonDAO extends BaseDAO {
         try {
             List<Object[]> rows = em.createNativeQuery(
                     "SELECT hd.maHD, hd.ngayLap, hd.tongTien, hd.trangThai, hd.hinhThucThanhToan, " +
-                    "hd.tienKhachDua, hd.giamGia, hd.maNV, hd.maKM, hd.maDon, NULL, ddm.maKH " +
+                    "hd.tienKhachDua, hd.giamGia, hd.maNV, hd.maKM, hd.maDon, b.tenBan, ddm.maKH " +
                     "FROM HoaDon hd JOIN DonDatMon ddm ON hd.maDon = ddm.maDon " +
+                    "LEFT JOIN Ban b ON ddm.maBan = b.maBan " +
                     "WHERE ddm.maBan = ? AND hd.trangThai = 'Chưa thanh toán'")
                     .setParameter(1, maBan).getResultList();
             if (rows.isEmpty()) return null;
