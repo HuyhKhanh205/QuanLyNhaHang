@@ -189,7 +189,7 @@ public class HoaDonDAO extends BaseDAO {
     public boolean thanhToanHoaDon(String maHD, double tongTien, double tienKhachDua,
                                     String hinhThucTT, double tienGiamGia, String maKM,
                                     String tenBanGhiLai) {
-        return inTransaction(em -> {
+        boolean result = inTransaction(em -> {
             List<Object[]> info = em.createNativeQuery(
                     "SELECT d.maDon, d.maBan FROM HoaDon h JOIN DonDatMon d ON h.maDon = d.maDon WHERE h.maHD = ?")
                     .setParameter(1, maHD).getResultList();
@@ -248,7 +248,10 @@ public class HoaDonDAO extends BaseDAO {
             }
             return true;
         });
-        if (result) SocketManager.sendEvent(SocketEvent.HOA_DON_THANH_TOAN,
+        if (
+
+
+                result) SocketManager.sendEvent(SocketEvent.HOA_DON_THANH_TOAN,
                 Map.of("maHD", maHD));
         return result;
     }

@@ -39,8 +39,8 @@
             <property name="hibernate.dialect"
                       value="org.hibernate.dialect.MariaDBDialect"/>
 
-            <!-- Validate schema khi khởi động (fail-fast nếu schema sai) -->
-            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <!-- Schema được tạo thủ công từ schema_mariadb.sql, không cần validate -->
+            <property name="hibernate.hbm2ddl.auto" value="none"/>
 
             <!-- Tắt show SQL trong production; bật khi debug -->
             <property name="hibernate.show_sql" value="false"/>

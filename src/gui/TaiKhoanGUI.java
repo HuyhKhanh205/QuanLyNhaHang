@@ -135,11 +135,15 @@ public class TaiKhoanGUI extends JFrame {
                 try {
                     TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAO();
                     loginResult = taiKhoanDAO.checkLoginAndGetInfo(tenDangNhap, matKhau);
-
-                } catch (RuntimeException ex) {
+                } catch (Exception ex) {
                     JOptionPane.showMessageDialog(TaiKhoanGUI.this,
                             "Lỗi kết nối CSDL! Vui lòng kiểm tra lại.\nChi tiết: " + ex.getMessage(),
                             "Lỗi CSDL", JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (Throwable t) {
+                    JOptionPane.showMessageDialog(TaiKhoanGUI.this,
+                            "Lỗi khởi tạo hệ thống!\nChi tiết: " + t.getMessage(),
+                            "Lỗi Hệ Thống", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 

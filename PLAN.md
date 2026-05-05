@@ -6,16 +6,19 @@
 
 ## Trạng thái hiện tại
 
-Code đã được migrate và push lên GitHub. **Chưa chạy được** vì:
-1. MariaDB chưa được setup
-2. Maven dependencies chưa được download vào IntelliJ
-3. Có **1 bug nghiêm trọng** trong Dashboard sẽ gây lỗi silent ngay khi login
+**Cập nhật 2026-05-05:** `mvn compile` → **BUILD SUCCESS** (0 errors).  
+Còn lại: setup MariaDB + seed data, sau đó test chức năng.
+
+~~Code đã được migrate và push lên GitHub. **Chưa chạy được** vì:~~  
+~~1. MariaDB chưa được setup~~  
+~~2. Maven dependencies chưa được download vào IntelliJ~~  
+~~3. Có **1 bug nghiêm trọng** trong Dashboard sẽ gây lỗi silent ngay khi login~~
 
 ---
 
 ## Bug cần sửa trước khi chạy
 
-### BUG-1 (Critical) — DashboardQuanLyGUI dùng key sai
+### BUG-1 (Critical) — DashboardQuanLyGUI dùng key sai ✅ FIXED
 **File:** `src/gui/DashboardQuanLyGUI.java` — dòng 478–480
 
 ```java
@@ -50,7 +53,7 @@ for (Object[] row : rows) {
 
 ---
 
-### BUG-2 (Minor) — schema_mariadb.sql unique index hint có thể fail
+### BUG-2 (Minor) — schema_mariadb.sql unique index hint có thể fail ✅ FIXED
 **File:** `src/schema_mariadb.sql` — phần tạo index cho `KhachHang.email`
 
 ```sql
@@ -66,7 +69,7 @@ MariaDB cho phép nhiều NULL trong UNIQUE index, nên không cần `WHERE emai
 
 ---
 
-### BUG-3 (Minor) — PhanCongDAO dead code
+### BUG-3 (Minor) — PhanCongDAO dead code ✅ FIXED
 **File:** `src/dao/PhanCongDAO.java` — `themPhanCong()`
 
 ```java
@@ -80,13 +83,62 @@ pc.getId();
 
 ---
 
+### BUG-7 (Critical) — hbm2ddl.auto=validate fail + login silent fail ✅ FIXED 2026-05-05
+**Files:** `src/META-INF/persistence.xml`, `src/gui/TaiKhoanGUI.java`
+
+**Nguyên nhân 1:** `hbm2ddl.auto=validate` throw `SchemaValidationException` vì entity dùng `float`/`double` nhưng DB column là `DECIMAL` (JDBC type 3 ≠ 6). Hibernate 6 không coi đây là compatible.
+
+**Nguyên nhân 2:** `catch (RuntimeException)` không bắt được `ExceptionInInitializerError` (là `Error`), khiến login button click không làm gì, người dùng không thấy lỗi.
+
+**Fix 1:** `persistence.xml`: `validate` → `none` (schema đã dựng đúng từ script).
+
+**Fix 2:** `TaiKhoanGUI`: tách thành `catch (Exception)` + `catch (Throwable)` để lỗi hệ thống luôn hiển thị ra dialog.
+
+**Verify:** Login với `admin`/`admin123` thành công.
+
+---
+
+### BUG-6 (Critical) — schema_mariadb.sql collation mismatch trên FK ✅ FIXED 2026-05-05
+**File:** `src/schema_mariadb.sql` — tất cả PK column
+
+MariaDB 12.2 dùng `utf8mb4_uca1400_ai_ci` làm default khi chỉ ghi `CHARACTER SET utf8mb4` trên column, nhưng database tạo với `utf8mb4_unicode_ci` → FK constraint bị reject với errno 150.
+
+**Fix:** Xóa `CHARACTER SET utf8mb4` khỏi tất cả column definitions; thêm `DROP DATABASE IF EXISTS` để reset sạch. Các column kế thừa collation `utf8mb4_unicode_ci` của DB.
+
+**Verify:** `SHOW TABLES;` hiện đủ 16 bảng, không lỗi FK.
+
+---
+
+### BUG-5 (Critical) — KhuyenMai schema DATETIME vs entity LocalDate ✅ FIXED 2026-05-05
+**File:** `src/schema_mariadb.sql` — bảng KhuyenMai
+
+Entity `KhuyenMai.ngayBatDau` và `ngayKetThuc` dùng `LocalDate` (JDBC type DATE = 91).
+Schema khai `DATETIME` (JDBC type TIMESTAMP = 93) → Hibernate `hbm2ddl.auto=validate` sẽ throw `SchemaValidationException` ngay khi khởi động app.
+
+**Fix:** `DATETIME NOT NULL` → `DATE NOT NULL` cho 2 cột này.
+
+**Verify:** App khởi động không báo SchemaValidationException.
+
+---
+
+### BUG-4 (Critical) — HoaDonDAO.thanhToanHoaDon() compile error ✅ FIXED 2026-05-05
+**File:** `src/dao/HoaDonDAO.java` — dòng 192
+
+`return inTransaction(...)` làm method kết thúc ngay, khiến `result` ở dòng 251–253 undeclared → compile error.
+
+**Fix:** Đổi `return inTransaction(...)` thành `boolean result = inTransaction(...)`.
+
+**Verify:** `mvn compile` → BUILD SUCCESS.
+
+---
+
 ## Thứ tự thực hiện
 
 ```
-Bước 1: Sửa 3 bug ở trên
-Bước 2: Setup môi trường (MariaDB + Maven)
-Bước 3: Chạy app và test từng chức năng
-Bước 4: Tạo data seed MariaDB
+Bước 1: Sửa bug                ✅ DONE (BUG-1,2,3,4 đã fix — mvn compile BUILD SUCCESS)
+Bước 2: Setup môi trường       ✅ DONE (16 bảng tạo OK, seed data loaded)
+Bước 3: Chạy app và test       ⏳ CHỜ bước 2
+Bước 4: Tạo data seed          ✅ DONE (src/data_mariadb.sql đã chạy vào DB)
 ```
 
 ---
@@ -109,8 +161,8 @@ Cần file seed data dùng **tên enum mới** (không phải tiếng Việt cho
 ```sql
 -- Ví dụ accounts
 INSERT INTO TaiKhoan(tenTK, matKhau, trangThai) VALUES
-  ('admin', 'hashed_-1294775406', 1),   -- password: admin123
-  ('nv01',  'hashed_-1294775406', 1);
+  ('admin', 'hashed_-969161597', 1),   -- password: admin123
+  ('nv01',  'hashed_-969161597', 1);
 
 INSERT INTO NhanVien(maNV, hoTen, ngaySinh, gioiTinh, sdt, ngayVaoLam, luong, tenTK, vaiTro, email)
 VALUES

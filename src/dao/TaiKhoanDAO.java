@@ -22,7 +22,8 @@ public class TaiKhoanDAO extends BaseDAO {
             if (rows.isEmpty()) return null;
             Object[] row = rows.get(0);
             String dbHashed = row[0].toString().trim();
-            int trangThai = ((Number) row[1]).intValue();
+            Object rawTT = row[1];
+            int trangThai = (rawTT instanceof Boolean) ? ((Boolean) rawTT ? 1 : 0) : ((Number) rawTT).intValue();
 
             if (!inputHashed.equals(dbHashed)) return null;
 
