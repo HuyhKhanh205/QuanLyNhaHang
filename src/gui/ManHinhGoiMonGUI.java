@@ -2,6 +2,9 @@ package gui;
 
 import dao.*;
 import entity.*;
+import socket.SocketClient;
+import socket.SocketEvent;
+import socket.SocketManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -39,6 +42,8 @@ public class ManHinhGoiMonGUI extends JPanel {
     private ChiTietHoaDonDAO chiTietDAO;
     private KhachHangDAO khachHangDAO;
     private KhuyenMaiDAO maKhuyenMaiDAO;
+    private DanhMucMonDAO danhMucMonDAO;
+    private JPanel pnlCategoryFilter;
 
     private JLabel lblTenBanHeader;
     private JTable tblChiTietHoaDon;
@@ -62,10 +67,12 @@ public class ManHinhGoiMonGUI extends JPanel {
         this.chiTietDAO = new ChiTietHoaDonDAO();
         this.khachHangDAO = new KhachHangDAO();
         this.maKhuyenMaiDAO = new KhuyenMaiDAO();
+        this.danhMucMonDAO = new DanhMucMonDAO();
 
         buildUI();
         loadDataFromDB();
         xoaThongTinGoiMon();
+        dangKySocketEvents();
     }
     private String phatSinhMaHD() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyy");
@@ -209,6 +216,7 @@ public class ManHinhGoiMonGUI extends JPanel {
         modelChiTietHoaDon.setRowCount(0);
         billPanel.clearBill();
         this.banHienTai = null;
+        this.activeHoaDon = null;
         if (statusColorBox != null) {
             statusColorBox.setBackground(ManHinhBanGUI.COLOR_STATUS_FREE);
         }
@@ -321,7 +329,15 @@ public class ManHinhGoiMonGUI extends JPanel {
 
         this.add(splitPane, BorderLayout.CENTER);
     }
+    private void dangKySocketEvents() {
+        SocketClient client = SocketManager.getClient();
+        if (client == null) return;
+        client.subscribe(SocketEvent.MENU_UPDATED, msg ->
+                SwingUtilities.invokeLater(this::loadDataFromDB));
+    }
+
     private void loadDataFromDB() {
+        reloadCategoryFilter();
         this.dsMonAnFull = monAnDAO.getMonAnDangKinhDoanh();
 
         pnlMenuItemContainer.removeAll();
@@ -480,10 +496,7 @@ public class ManHinhGoiMonGUI extends JPanel {
         return banHienTai;
     }
     public HoaDon getActiveHoaDon() {
-        if (banHienTai != null && banHienTai.getTrangThai() == TrangThaiBan.DANG_PHUC_VU) {
-            return hoaDonDAO_GoiMon.getHoaDonChuaThanhToan(banHienTai.getMaBan());
-        }
-        return null;
+        return activeHoaDon;
     }
 
     public String getMaNVDangNhap() {
@@ -491,34 +504,39 @@ public class ManHinhGoiMonGUI extends JPanel {
     }
 
     private JPanel createCategoryFilterPanel() {
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        filterPanel.setOpaque(false);
+        pnlCategoryFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        pnlCategoryFilter.setOpaque(false);
+        // Nội dung sẽ được điền bởi reloadCategoryFilter() trong loadDataFromDB()
+        return pnlCategoryFilter;
+    }
+
+    private void reloadCategoryFilter() {
+        if (pnlCategoryFilter == null) return;
+        pnlCategoryFilter.removeAll();
         ButtonGroup group = new ButtonGroup();
 
-        String[][] categories = {
-                {"Tất cả", "Tất cả"},
-                {"DM0001", "Món ăn"},
-                {"DM0002", "Giải khát"},
-                {"DM0003", "Rượu vang"}
-        };
-
         ActionListener filterListener = e -> {
-            String selectedCategory = e.getActionCommand();
-            currentCategoryFilter = selectedCategory;
+            currentCategoryFilter = e.getActionCommand();
             filterMonAn();
         };
 
-        for (int i = 0; i < categories.length; i++) {
-            String maDM = categories[i][0];
-            String tenDM = categories[i][1];
+        JToggleButton btnAll = createFilterButton("Tất cả", true);
+        btnAll.setActionCommand("Tất cả");
+        btnAll.addActionListener(filterListener);
+        group.add(btnAll);
+        pnlCategoryFilter.add(btnAll);
 
-            JToggleButton button = createFilterButton(tenDM, i == 0);
-            button.setActionCommand(maDM);
-            button.addActionListener(filterListener);
-            group.add(button);
-            filterPanel.add(button);
+        for (DanhMucMon dm : danhMucMonDAO.getAllDanhMuc()) {
+            JToggleButton btn = createFilterButton(dm.getTendm(), false);
+            btn.setActionCommand(dm.getMadm());
+            btn.addActionListener(filterListener);
+            group.add(btn);
+            pnlCategoryFilter.add(btn);
         }
-        return filterPanel;
+
+        currentCategoryFilter = "Tất cả";
+        pnlCategoryFilter.revalidate();
+        pnlCategoryFilter.repaint();
     }
     private JToggleButton createFilterButton(String text, boolean selected) {
         JToggleButton button = new JToggleButton(text);

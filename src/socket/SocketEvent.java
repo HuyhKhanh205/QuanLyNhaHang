@@ -5,5 +5,6 @@ public enum SocketEvent {
     ORDER_CREATED,          // maDon, maBan
     ORDER_UPDATED,          // maDon
     HOA_DON_THANH_TOAN,     // maHD, maBan
+    MENU_UPDATED,           // (no data) — món ăn được thêm/sửa/xóa
     PING
 }

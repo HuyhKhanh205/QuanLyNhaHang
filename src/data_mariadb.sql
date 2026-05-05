@@ -1,6 +1,8 @@
 -- =====================================================
 -- Seed data cho StarGuardianDB
 -- Password "admin123" → hash: hashed_-969161597
+-- Migration fix (nếu DB cũ dùng 'Còn hàng'):
+--   UPDATE MonAn SET trangThai = 'Còn' WHERE trangThai = 'Còn hàng';
 -- =====================================================
 
 USE StarGuardianDB;
@@ -49,13 +51,13 @@ INSERT IGNORE INTO Ban (maBan, tenBan, soGhe, trangThai, gioMoBan, khuVuc) VALUE
 -- MonAn
 -- =====================================================
 INSERT IGNORE INTO MonAn (maMonAn, tenMon, moTa, donGia, donViTinh, trangThai, hinhAnh, maDM) VALUES
-  ('MON001', 'Cơm sườn nướng',    'Cơm trắng + sườn nướng than hoa',  75000, 'Phần', 'Còn hàng', NULL, 'DM001'),
-  ('MON002', 'Bún bò Huế',        'Bún bò cay đặc trưng Huế',         65000, 'Tô',   'Còn hàng', NULL, 'DM001'),
-  ('MON003', 'Phở bò tái chín',   'Phở bò truyền thống',              60000, 'Tô',   'Còn hàng', NULL, 'DM001'),
-  ('MON004', 'Gà chiên giòn',     'Đùi gà chiên giòn',                80000, 'Phần', 'Còn hàng', NULL, 'DM001'),
-  ('MON005', 'Cà phê đen',        'Cà phê phin truyền thống',         25000, 'Ly',   'Còn hàng', NULL, 'DM002'),
-  ('MON006', 'Cà phê sữa đá',     'Cà phê phin + sữa đặc + đá',      30000, 'Ly',   'Còn hàng', NULL, 'DM002'),
-  ('MON007', 'Nước cam ép',        'Cam tươi ép',                      35000, 'Ly',   'Còn hàng', NULL, 'DM002'),
-  ('MON008', 'Trà đào cam sả',    'Trà đào tươi mát',                 40000, 'Ly',   'Còn hàng', NULL, 'DM002'),
-  ('MON009', 'Chè khúc bạch',     'Chè khúc bạch hạnh nhân',         45000, 'Ly',   'Còn hàng', NULL, 'DM003'),
-  ('MON010', 'Kem dừa',           'Kem dừa tươi',                     35000, 'Phần', 'Còn hàng', NULL, 'DM003');
+  ('MON001', 'Cơm sườn nướng',    'Cơm trắng + sườn nướng than hoa',  75000, 'Phần', 'Còn', NULL, 'DM001'),
+  ('MON002', 'Bún bò Huế',        'Bún bò cay đặc trưng Huế',         65000, 'Tô',   'Còn', NULL, 'DM001'),
+  ('MON003', 'Phở bò tái chín',   'Phở bò truyền thống',              60000, 'Tô',   'Còn', NULL, 'DM001'),
+  ('MON004', 'Gà chiên giòn',     'Đùi gà chiên giòn',                80000, 'Phần', 'Còn', NULL, 'DM001'),
+  ('MON005', 'Cà phê đen',        'Cà phê phin truyền thống',         25000, 'Ly',   'Còn', NULL, 'DM002'),
+  ('MON006', 'Cà phê sữa đá',     'Cà phê phin + sữa đặc + đá',      30000, 'Ly',   'Còn', NULL, 'DM002'),
+  ('MON007', 'Nước cam ép',        'Cam tươi ép',                      35000, 'Ly',   'Còn', NULL, 'DM002'),
+  ('MON008', 'Trà đào cam sả',    'Trà đào tươi mát',                 40000, 'Ly',   'Còn', NULL, 'DM002'),
+  ('MON009', 'Chè khúc bạch',     'Chè khúc bạch hạnh nhân',         45000, 'Ly',   'Còn', NULL, 'DM003'),
+  ('MON010', 'Kem dừa',           'Kem dừa tươi',                     35000, 'Phần', 'Còn', NULL, 'DM003');

@@ -2,8 +2,11 @@ package dao;
 
 import entity.MonAn;
 import jakarta.persistence.EntityManager;
+import socket.SocketEvent;
+import socket.SocketManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MonAnDAO extends BaseDAO {
 
@@ -61,6 +64,7 @@ public class MonAnDAO extends BaseDAO {
             m.setMaMonAn(getNextMaMonAn());
         try {
             inTransactionVoid(em -> em.persist(m));
+            SocketManager.sendEvent(SocketEvent.MENU_UPDATED, Map.of());
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
@@ -68,6 +72,7 @@ public class MonAnDAO extends BaseDAO {
     public boolean capNhatMonAn(MonAn m) {
         try {
             inTransactionVoid(em -> em.merge(m));
+            SocketManager.sendEvent(SocketEvent.MENU_UPDATED, Map.of());
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
@@ -78,6 +83,7 @@ public class MonAnDAO extends BaseDAO {
                 MonAn m = em.find(MonAn.class, maMon);
                 if (m != null) em.remove(m);
             });
+            SocketManager.sendEvent(SocketEvent.MENU_UPDATED, Map.of());
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }

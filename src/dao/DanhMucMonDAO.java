@@ -49,7 +49,7 @@ public class DanhMucMonDAO extends BaseDAO {
             if (!r.isEmpty() && r.get(0) != null) {
                 try {
                     int num = Integer.parseInt(r.get(0).replace("DM", ""));
-                    return String.format("DM%04d", num + 1);
+                    return String.format("DM%03d", num + 1);
                 } catch (NumberFormatException ignored) {}
             }
             return "DM0001";
