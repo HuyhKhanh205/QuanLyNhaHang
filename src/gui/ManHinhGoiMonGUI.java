@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.table.TableColumn;
 
@@ -165,16 +166,7 @@ public class ManHinhGoiMonGUI extends JPanel {
             }
 
             else if (banThucSu.getTrangThai() == TrangThaiBan.TRONG) {
-                int confirm = JOptionPane.showConfirmDialog(this,
-                        "Bạn có muốn mở bàn '" + banThucSu.getTenBan() + "' cho khách không?",
-                        "Mở bàn mới", JOptionPane.YES_NO_OPTION);
-
-                if (confirm == JOptionPane.YES_OPTION) {
-                    moBanMoi(banThucSu);
-                    requireBanRefresh = true;
-                } else {
-                    return false;
-                }
+                // Lazy open: vào gọi món ngay, bàn sẽ mở khi có món đầu tiên
             }
 
             else if (banThucSu.getTrangThai() == TrangThaiBan.DA_DAT_TRUOC) {
@@ -237,10 +229,33 @@ public class ManHinhGoiMonGUI extends JPanel {
         }
     }
 
+    private float tinhTongGocTuBang() {
+        float tong = 0;
+        for (int i = 0; i < modelChiTietHoaDon.getRowCount(); i++) {
+            Object sl = modelChiTietHoaDon.getValueAt(i, 3);
+            Object dg = modelChiTietHoaDon.getValueAt(i, 4);
+            if (sl instanceof Number && dg instanceof Number)
+                tong += ((Number) sl).intValue() * ((Number) dg).floatValue();
+        }
+        return tong;
+    }
+
     private void addMonAnToOrder(MonAn monAn) {
         if (banHienTai == null) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn bàn trước khi gọi món!", "Chưa chọn bàn", JOptionPane.WARNING_MESSAGE);
             return;
+        }
+
+        // Lazy open: tạo DonDatMon + HoaDon + set DANG_PHUC_VU khi có món đầu tiên
+        if (activeHoaDon == null) {
+            try {
+                moBanMoi(banHienTai);
+                if (parentDanhSachBanGUI_GoiMon != null)
+                    parentDanhSachBanGUI_GoiMon.refreshManHinhBan();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Lỗi mở bàn: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         }
 
         String maMon = monAn.getMaMonAn();
@@ -250,25 +265,21 @@ public class ManHinhGoiMonGUI extends JPanel {
         for (int i = 0; i < modelChiTietHoaDon.getRowCount(); i++) {
             String maMonTrongBang = (String) modelChiTietHoaDon.getValueAt(i, 1);
             if (maMon.equals(maMonTrongBang)) {
-                int soLuongHienTai = (int) modelChiTietHoaDon.getValueAt(i, 3);
-                int soLuongMoi = soLuongHienTai + 1;
+                int soLuongMoi = (int) modelChiTietHoaDon.getValueAt(i, 3) + 1;
                 modelChiTietHoaDon.setValueAt(soLuongMoi, i, 3);
-                float thanhTienMoi = soLuongMoi * donGia;
-                modelChiTietHoaDon.setValueAt(thanhTienMoi, i, 5);
+                modelChiTietHoaDon.setValueAt(soLuongMoi * donGia, i, 5);
+                chiTietDAO.suaChiTiet(new ChiTietHoaDon(maMon, activeHoaDon.getMaDon(), soLuongMoi, donGia));
+                hoaDonDAO_GoiMon.capNhatTongTien(activeHoaDon.getMaHD(), tinhTongGocTuBang());
+                SocketManager.sendEvent(SocketEvent.ORDER_UPDATED, Map.of("maDon", activeHoaDon.getMaDon()));
                 updateBillPanelTotals();
                 return;
             }
         }
 
-        Object[] rowData = {
-                "X",
-                maMon,
-                tenMon,
-                Integer.valueOf(1),
-                donGia,
-                donGia
-        };
-        modelChiTietHoaDon.addRow(rowData);
+        modelChiTietHoaDon.addRow(new Object[]{"X", maMon, tenMon, Integer.valueOf(1), donGia, donGia});
+        chiTietDAO.themChiTiet(new ChiTietHoaDon(maMon, activeHoaDon.getMaDon(), 1, donGia));
+        hoaDonDAO_GoiMon.capNhatTongTien(activeHoaDon.getMaHD(), tinhTongGocTuBang());
+        SocketManager.sendEvent(SocketEvent.ORDER_UPDATED, Map.of("maDon", activeHoaDon.getMaDon()));
         updateBillPanelTotals();
     }
     private List<ChiTietHoaDon> layChiTietTuTable() {
@@ -701,11 +712,17 @@ public class ManHinhGoiMonGUI extends JPanel {
             if (isPushed && table != null) {
                 final DefaultTableModel finalModel = (DefaultTableModel) table.getModel();
                 final int rowToRemove = editingRow;
+                final String maMonToDelete = (rowToRemove >= 0 && rowToRemove < finalModel.getRowCount())
+                        ? (String) finalModel.getValueAt(rowToRemove, 1) : null;
 
                 SwingUtilities.invokeLater(() -> {
-
                     if (rowToRemove >= 0 && rowToRemove < finalModel.getRowCount()) {
                         finalModel.removeRow(rowToRemove);
+                        if (maMonToDelete != null && activeHoaDon != null) {
+                            chiTietDAO.xoaChiTiet(activeHoaDon.getMaDon(), maMonToDelete);
+                            hoaDonDAO_GoiMon.capNhatTongTien(activeHoaDon.getMaHD(), tinhTongGocTuBang());
+                            SocketManager.sendEvent(SocketEvent.ORDER_UPDATED, Map.of("maDon", activeHoaDon.getMaDon()));
+                        }
                         updateBillPanelTotals();
                     } else {
                         System.err.println("ButtonEditor (invokeLater): Lỗi index dòng khi xóa: " + rowToRemove);
@@ -777,11 +794,17 @@ public class ManHinhGoiMonGUI extends JPanel {
                         int currentQuantity = (Integer) spinner.getValue();
                         float donGia = (Float) model.getValueAt(editingRow, 4);
                         float thanhTienMoi = currentQuantity * donGia;
+                        final int row = editingRow;
 
                         SwingUtilities.invokeLater(() -> {
-
-                            if (editingRow < model.getRowCount()) {
-                                model.setValueAt(thanhTienMoi, editingRow, 5);
+                            if (row < model.getRowCount()) {
+                                model.setValueAt(thanhTienMoi, row, 5);
+                                if (activeHoaDon != null) {
+                                    String maMon = (String) model.getValueAt(row, 1);
+                                    chiTietDAO.suaChiTiet(new ChiTietHoaDon(maMon, activeHoaDon.getMaDon(), currentQuantity, donGia));
+                                    hoaDonDAO_GoiMon.capNhatTongTien(activeHoaDon.getMaHD(), tinhTongGocTuBang());
+                                    SocketManager.sendEvent(SocketEvent.ORDER_UPDATED, Map.of("maDon", activeHoaDon.getMaDon()));
+                                }
                                 updateBillPanelTotals();
                             }
                         });

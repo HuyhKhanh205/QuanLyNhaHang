@@ -23,7 +23,6 @@ import entity.KhachHang; // Import KhachHang
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -44,7 +43,7 @@ public class BillPanel extends JPanel {
     private String customHeaderName = "";
 
 
-    private JButton btnLuuMon, btnInTamTinh, btnThanhToan;
+    private JButton btnGuiBep, btnInTamTinh, btnThanhToan;
 
     private ManHinhGoiMonGUI parentGoiMonGUI;
     private ManHinhBanGUI parentBanGUI;
@@ -94,12 +93,12 @@ public class BillPanel extends JPanel {
             btnThanhToan.addActionListener(e -> xuLyThanhToan());
 
             if (parentGoiMonGUI != null) {
-                btnLuuMon.addActionListener(e -> xuLyLuuMon_Clicked());
+                btnGuiBep.addActionListener(e -> xuLyGuiBep());
             } else {
-                btnLuuMon.setEnabled(false);
+                btnGuiBep.setEnabled(false);
             }
         } else {
-            btnLuuMon.setEnabled(false);
+            btnGuiBep.setEnabled(false);
             btnInTamTinh.setEnabled(false);
             btnThanhToan.setEnabled(false);
         }
@@ -117,8 +116,8 @@ public class BillPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (btnLuuMon.isEnabled()) {
-                    btnLuuMon.doClick();
+                if (btnGuiBep.isEnabled()) {
+                    btnGuiBep.doClick();
                 }
             }
         });
@@ -165,7 +164,6 @@ public class BillPanel extends JPanel {
         if (parentGoiMonGUI != null) {
 
             if (parentGoiMonGUI.getModelChiTietHoaDon().getRowCount() == 0) return;
-            if (!luuMonAnVaoCSDL(false)) return;
             List<ChiTietHoaDon> dsMonMoi = chiTietDAO.getChiTietTheoMaDon(activeHoaDon.getMaDon());
             activeHoaDon.setDsChiTiet(dsMonMoi);
             activeHoaDon.tinhLaiGiamGiaVaTongTien(khachHangDAO, maKhuyenMaiDAO);
@@ -318,8 +316,18 @@ public class BillPanel extends JPanel {
         }
 
     }
-    private void xuLyLuuMon_Clicked() {
-        boolean luuThanhCong = luuMonAnVaoCSDL(true);
+    private void xuLyGuiBep() {
+        if (parentGoiMonGUI == null || parentGoiMonGUI.getActiveHoaDon() == null) return;
+        String maDon = parentGoiMonGUI.getActiveHoaDon().getMaDon();
+        socket.SocketManager.sendEvent(socket.SocketEvent.ORDER_UPDATED, Map.of("maDon", maDon));
+        btnGuiBep.setText("Đã gửi!");
+        btnGuiBep.setEnabled(false);
+        javax.swing.Timer t = new javax.swing.Timer(1500, e -> {
+            btnGuiBep.setText("Gửi bếp (F2)");
+            btnGuiBep.setEnabled(true);
+        });
+        t.setRepeats(false);
+        t.start();
     }
     private List<ChiTietHoaDon> getCurrentDetailList() {
         List<ChiTietHoaDon> list = new ArrayList<>();
@@ -366,143 +374,6 @@ public class BillPanel extends JPanel {
         }
         return list;
     }
-    private boolean luuMonAnVaoCSDL(boolean hienThongBaoThanhCong) {
-
-        if (parentGoiMonGUI == null) return false;
-        Ban banHienTai = parentGoiMonGUI.getBanHienTai();
-        HoaDon activeHoaDon = parentGoiMonGUI.getActiveHoaDon();
-        DefaultTableModel model = parentGoiMonGUI.getModelChiTietHoaDon();
-
-        if (banHienTai == null || activeHoaDon == null || activeHoaDon.getMaDon() == null) {
-            if (hienThongBaoThanhCong) {
-                JOptionPane.showMessageDialog(this, "Chưa có hóa đơn hợp lệ để lưu!", "Lỗi Lưu Món", JOptionPane.ERROR_MESSAGE);
-            }
-            return false;
-        }
-        String maDon = activeHoaDon.getMaDon();
-
-        Map<String, Integer> itemsTrenGUI = new HashMap<>();
-        float tongTienMoiGUI = 0;
-        for (int i = 0; i < model.getRowCount(); i++) {
-            String maMon = (String) model.getValueAt(i, 1);
-            Object soLuongObj = model.getValueAt(i, 3);
-            Object thanhTienObj = model.getValueAt(i, 5);
-            Integer soLuong = 0;
-            Float thanhTien = 0f;
-            try {
-
-                if (soLuongObj != null) {
-                    if (soLuongObj instanceof Number) {
-                        soLuong = ((Number) soLuongObj).intValue();
-                    } else {
-                        soLuong = Integer.parseInt(soLuongObj.toString().trim());
-                    }
-                }
-
-                if (thanhTienObj != null) {
-                    if (thanhTienObj instanceof Number) {
-                        thanhTien = ((Number) thanhTienObj).floatValue();
-                    } else {
-                        thanhTien = Float.parseFloat(thanhTienObj.toString().trim());
-                    }
-                }
-            } catch (Exception parseEx) {
-                System.err.println("Lỗi chuyển đổi kiểu dữ liệu tại hàng " + i + ": " + parseEx.getMessage());
-                continue;
-            }
-
-            if (maMon != null && soLuong > 0) {
-                itemsTrenGUI.put(maMon, soLuong);
-                tongTienMoiGUI += thanhTien;
-            }
-        }
-
-        List<ChiTietHoaDon> itemsTrongDB_List = chiTietDAO.getChiTietTheoMaDon(maDon);
-
-        Map<String, ChiTietHoaDon> itemsTrongDB = new HashMap<>();
-        for (ChiTietHoaDon ct : itemsTrongDB_List) {
-            itemsTrongDB.put(ct.getMaMon(), ct);
-        }
-
-        boolean coLoi = false;
-
-        try {
-            for (Map.Entry<String, Integer> entryGUI : itemsTrenGUI.entrySet()) {
-                String maMonGUI = entryGUI.getKey();
-                int soLuongGUI = entryGUI.getValue();
-
-                if (!itemsTrongDB.containsKey(maMonGUI)) {
-                    float donGia = monAnDAO.getDonGiaByMa(maMonGUI);
-
-                    if (donGia > 0) {
-                        ChiTietHoaDon ctMoi = new ChiTietHoaDon(maMonGUI, maDon, soLuongGUI, donGia);
-                        if (!chiTietDAO.themChiTiet(ctMoi)) {
-                            coLoi = true;
-                            System.err.println("Lỗi khi thêm chi tiết: " + maMonGUI);
-                        }
-                    } else {
-                        System.err.println("Không tìm thấy đơn giá cho món mới: " + maMonGUI);
-                    }
-                }
-            }
-
-            for (Map.Entry<String, ChiTietHoaDon> entryDB : itemsTrongDB.entrySet()) {
-                String maMonDB = entryDB.getKey();
-                if (!itemsTrenGUI.containsKey(maMonDB)) {
-                    if (!chiTietDAO.xoaChiTiet(maDon, maMonDB)) {
-                        coLoi = true;
-                        System.err.println("Lỗi khi xóa chi tiết: " + maMonDB);
-                    }
-                }
-            }
-            for (Map.Entry<String, Integer> entryGUI : itemsTrenGUI.entrySet()) {
-                String maMonGUI = entryGUI.getKey();
-                int soLuongGUI = entryGUI.getValue();
-
-                if (itemsTrongDB.containsKey(maMonGUI)) {
-                    ChiTietHoaDon ctTrongDB = itemsTrongDB.get(maMonGUI);
-                    if (ctTrongDB.getSoluong() != soLuongGUI) {
-
-                        ctTrongDB.setSoluong(soLuongGUI);
-                        if (!chiTietDAO.suaChiTiet(ctTrongDB)) {
-                            coLoi = true;
-                            System.err.println("Lỗi khi sửa chi tiết: " + maMonGUI);
-                        }
-                    }
-                }
-            }
-
-            if (!coLoi) {
-                float tongTienGoc = 0;
-                for (int i = 0; i < model.getRowCount(); i++) {
-                    tongTienGoc += (Float) model.getValueAt(i, 4) * (Integer) model.getValueAt(i, 3);
-                }
-                if (!hoaDonDAO.capNhatTongTien(activeHoaDon.getMaHD(), tongTienGoc)) {
-                    coLoi = true;
-                    System.err.println("Lỗi khi cập nhật tổng tiền hóa đơn!");
-                }
-            }
-
-        } catch (Exception ex) {
-            coLoi = true;
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Đã xảy ra lỗi khi lưu món ăn:\n" + ex.getMessage(), "Lỗi Hệ Thống", JOptionPane.ERROR_MESSAGE);
-        }
-
-        if (parentGoiMonGUI != null) {
-            parentGoiMonGUI.updateBillPanelTotals();
-        }
-
-        if (!coLoi) {
-            if (hienThongBaoThanhCong) {
-                JOptionPane.showMessageDialog(this, "Đã lưu các thay đổi món ăn thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-            }
-            return true;
-        } else {
-            JOptionPane.showMessageDialog(this, "Có lỗi xảy ra trong quá trình lưu món ăn.", "Lỗi Lưu Món", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-    }
     public void setCustomHeader(String name) {
         this.customHeaderName = name;
 
@@ -516,10 +387,10 @@ public class BillPanel extends JPanel {
         JPanel leftActionPanel = new JPanel(new GridLayout(2, 1, 0, 10));
         leftActionPanel.setOpaque(false);
 
-        btnLuuMon = createBigButton("Lưu món (F2)", COLOR_BUTTON_BLUE);
+        btnGuiBep = createBigButton("Gửi bếp (F2)", COLOR_BUTTON_BLUE);
         btnInTamTinh = createBigButton("Xem tạm tính", COLOR_BUTTON_BLUE);
 
-        leftActionPanel.add(btnLuuMon);
+        leftActionPanel.add(btnGuiBep);
         leftActionPanel.add(btnInTamTinh);
         mainPanel.add(leftActionPanel, BorderLayout.WEST);
 
