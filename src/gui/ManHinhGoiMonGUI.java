@@ -91,6 +91,7 @@ public class ManHinhGoiMonGUI extends JPanel {
         ddm.setNgayKhoiTao(LocalDateTime.now());
         ddm.setMaNV(maNVDangNhap);
         ddm.setMaBan(ban.getMaBan());
+        ddm.setTrangThai("Chưa thanh toán");
         donDatMonDAO.themDonDatMon(ddm);
 
         HoaDon hd = new HoaDon(phatSinhMaHD(), LocalDateTime.now(), "Chưa thanh toán", "Tiền mặt", ddm.getMaDon(), maNVDangNhap, null);
