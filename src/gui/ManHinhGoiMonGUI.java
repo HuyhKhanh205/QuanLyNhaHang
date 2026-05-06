@@ -140,9 +140,24 @@ public class ManHinhGoiMonGUI extends JPanel {
                 activeHoaDon = hoaDonDAO_GoiMon.getHoaDonChuaThanhToan(banThucSu.getMaBan());
 
                 if (activeHoaDon == null) {
-                    System.err.println("Lỗi logic: Bàn ĐPV nhưng không có HĐ!");
-                    JOptionPane.showMessageDialog(this, "Lỗi dữ liệu: Bàn đang phục vụ nhưng mất hóa đơn.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    return false;
+                    String[] options = {"Tạo hóa đơn mới", "Đặt lại bàn về Trống", "Hủy"};
+                    int choice = JOptionPane.showOptionDialog(this,
+                            "Bàn '" + banThucSu.getTenBan() + "' đang phục vụ nhưng không tìm thấy hóa đơn.\n" +
+                            "Bạn muốn làm gì?",
+                            "Dữ liệu không nhất quán", JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+                    if (choice == 0) {
+                        moBanMoi(banThucSu);
+                        requireBanRefresh = true;
+                    } else if (choice == 1) {
+                        banThucSu.setTrangThai(TrangThaiBan.TRONG);
+                        banThucSu.setGioMoBan(null);
+                        banDAO.updateBan(banThucSu);
+                        if (parentDanhSachBanGUI_GoiMon != null) parentDanhSachBanGUI_GoiMon.refreshManHinhBan();
+                        return false;
+                    } else {
+                        return false;
+                    }
                 }
 
                 this.activeHoaDon = activeHoaDon;
@@ -858,7 +873,7 @@ public class ManHinhGoiMonGUI extends JPanel {
                             "Đồng bộ bàn đặt", JOptionPane.YES_NO_OPTION);
 
                     if (confirm == JOptionPane.YES_OPTION) {
-                        boolean ketQua = banDAO.ghepBanLienKet(dsBanPhu, banChinh);
+                        boolean ketQua = banDAO.ghepBanLienKet(dsBanPhu, banChinh, maNVDangNhap);
 
                         if (ketQua) {
                             if (parentDanhSachBanGUI_GoiMon != null) parentDanhSachBanGUI_GoiMon.refreshManHinhBan();
