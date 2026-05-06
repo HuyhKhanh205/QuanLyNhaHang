@@ -85,18 +85,28 @@ public class ManHinhGoiMonGUI extends JPanel {
     private void moBanMoi(Ban ban) throws Exception {
         ban.setTrangThai(TrangThaiBan.DANG_PHUC_VU);
         ban.setGioMoBan(LocalDateTime.now());
-        banDAO.updateBan(ban);
+        if (!banDAO.updateBan(ban)) throw new Exception("Không thể cập nhật trạng thái bàn!");
 
         DonDatMon ddm = new DonDatMon();
         ddm.setNgayKhoiTao(LocalDateTime.now());
         ddm.setMaNV(maNVDangNhap);
         ddm.setMaBan(ban.getMaBan());
         ddm.setTrangThai("Chưa thanh toán");
-        donDatMonDAO.themDonDatMon(ddm);
+        if (!donDatMonDAO.themDonDatMon(ddm)) {
+            ban.setTrangThai(TrangThaiBan.TRONG);
+            ban.setGioMoBan(null);
+            banDAO.updateBan(ban);
+            throw new Exception("Không thể tạo đơn đặt món!");
+        }
 
         HoaDon hd = new HoaDon(phatSinhMaHD(), LocalDateTime.now(), "Chưa thanh toán", "Tiền mặt", ddm.getMaDon(), maNVDangNhap, null);
         hd.setTongTienTuDB(0);
-        hoaDonDAO_GoiMon.themHoaDon(hd);
+        if (!hoaDonDAO_GoiMon.themHoaDon(hd)) {
+            ban.setTrangThai(TrangThaiBan.TRONG);
+            ban.setGioMoBan(null);
+            banDAO.updateBan(ban);
+            throw new Exception("Không thể tạo hóa đơn!");
+        }
 
         this.activeHoaDon = hd;
         statusColorBox.setBackground(ManHinhBanGUI.COLOR_STATUS_OCCUPIED);
@@ -162,7 +172,6 @@ public class ManHinhGoiMonGUI extends JPanel {
                     }
                 }
 
-                this.activeHoaDon = activeHoaDon;
                 System.out.println("Đang tải hóa đơn: " + activeHoaDon.getMaHD());
             }
 
