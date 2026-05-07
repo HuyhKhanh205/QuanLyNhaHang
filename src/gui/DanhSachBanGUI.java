@@ -190,6 +190,11 @@ public class DanhSachBanGUI extends JPanel implements ActionListener {
             }
         }
     }
+    public void chuyenSangGoiMon() {
+        btnTabGoiMon.setSelected(true);
+        btnTabGoiMon.doClick();
+    }
+
     public void refreshManHinhBan() {
         System.out.println("Đã nhận yêu cầu refresh...");
         if (manHinhBanGUI != null) {

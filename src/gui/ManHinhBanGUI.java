@@ -786,18 +786,17 @@ public class ManHinhBanGUI extends JPanel {
                         banPanel.setSelected(true);
 
                         Ban banThucTeCanLoad = ban;
-
                         String maBanChinh = banDAO.getMaBanChinh(ban.getMaBan());
-
                         if (!maBanChinh.equals(ban.getMaBan())) {
                             banThucTeCanLoad = banDAO.getBanByMa(maBanChinh);
                         }
-
                         String tenHienThiGhep = banDAO.getTenHienThiGhep(ban.getMaBan());
-
                         selectedTable = banThucTeCanLoad;
-
                         updateRightPanelDetails(banThucTeCanLoad, tenHienThiGhep);
+
+                        if (e.getClickCount() == 2 && parentDanhSachBanGUI != null) {
+                            parentDanhSachBanGUI.chuyenSangGoiMon();
+                        }
                     }
                 });
                 leftTableContainer.add(banPanel);

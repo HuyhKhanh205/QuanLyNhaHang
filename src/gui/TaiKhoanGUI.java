@@ -119,6 +119,11 @@ public class TaiKhoanGUI extends JFrame {
             }
         });
 
+        // Enter trên bất kỳ field nào trong form đều kích hoạt đăng nhập
+        java.awt.event.ActionListener enterAction = e -> btnDangNhap.doClick();
+        txtTenDangNhap.addActionListener(enterAction);
+        txtMatKhau.addActionListener(enterAction);
+
         btnDangNhap.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
