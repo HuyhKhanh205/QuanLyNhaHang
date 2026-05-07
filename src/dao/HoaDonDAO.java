@@ -160,6 +160,15 @@ public class HoaDonDAO extends BaseDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+    public boolean xoaHoaDon(String maHD) {
+        try {
+            inTransactionVoid(em ->
+                em.createNativeQuery("DELETE FROM HoaDon WHERE maHD = ?")
+                        .setParameter(1, maHD).executeUpdate());
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
     public boolean capNhatTongTien(String maHD, float tongTienMoi) {
         try {
             inTransactionVoid(em ->

@@ -239,6 +239,20 @@ public class ManHinhGoiMonGUI extends JPanel {
         }
     }
 
+    private void dongBan() {
+        if (activeHoaDon == null || banHienTai == null) return;
+        hoaDonDAO_GoiMon.xoaHoaDon(activeHoaDon.getMaHD());
+        donDatMonDAO.xoaDonDatMon(activeHoaDon.getMaDon());
+        banHienTai.setTrangThai(TrangThaiBan.TRONG);
+        banHienTai.setGioMoBan(null);
+        banDAO.updateBan(banHienTai);
+        SocketManager.sendEvent(SocketEvent.TABLE_STATUS_CHANGED, Map.of());
+        xoaThongTinGoiMon();
+        if (parentDanhSachBanGUI_GoiMon != null) {
+            parentDanhSachBanGUI_GoiMon.refreshManHinhBan();
+        }
+    }
+
     private float tinhTongGocTuBang() {
         float tong = 0;
         for (int i = 0; i < modelChiTietHoaDon.getRowCount(); i++) {
@@ -743,6 +757,19 @@ public class ManHinhGoiMonGUI extends JPanel {
                             chiTietDAO.xoaChiTiet(activeHoaDon.getMaDon(), maMonToDelete);
                             hoaDonDAO_GoiMon.capNhatTongTien(activeHoaDon.getMaHD(), tinhTongGocTuBang());
                             SocketManager.sendEvent(SocketEvent.ORDER_UPDATED, Map.of("maDon", activeHoaDon.getMaDon()));
+                            if (finalModel.getRowCount() == 0) {
+                                int choice = JOptionPane.showConfirmDialog(
+                                        ManHinhGoiMonGUI.this,
+                                        "Không còn món nào trong đơn.\nĐóng bàn và đặt lại về Trống?",
+                                        "Đóng bàn",
+                                        JOptionPane.YES_NO_OPTION,
+                                        JOptionPane.QUESTION_MESSAGE
+                                );
+                                if (choice == JOptionPane.YES_OPTION) {
+                                    dongBan();
+                                    return;
+                                }
+                            }
                         }
                         updateBillPanelTotals();
                     } else {
