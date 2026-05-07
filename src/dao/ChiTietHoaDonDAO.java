@@ -55,7 +55,9 @@ public class ChiTietHoaDonDAO extends BaseDAO {
     public boolean suaChiTiet(ChiTietHoaDon ct) {
         try {
             inTransactionVoid(em ->
-                em.createNativeQuery("UPDATE ChiTietHoaDon SET soLuong = ? WHERE maDon = ? AND maMonAn = ?")
+                em.createNativeQuery(
+                    "UPDATE ChiTietHoaDon SET soLuong = ?, trangThaiMon = 'Chờ' " +
+                    "WHERE maDon = ? AND maMonAn = ?")
                         .setParameter(1, ct.getSoluong()).setParameter(2, ct.getMaDon())
                         .setParameter(3, ct.getMaMon()).executeUpdate());
             return true;
