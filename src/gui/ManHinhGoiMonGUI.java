@@ -275,10 +275,16 @@ public class ManHinhGoiMonGUI extends JPanel {
         for (int i = 0; i < modelChiTietHoaDon.getRowCount(); i++) {
             String maMonTrongBang = (String) modelChiTietHoaDon.getValueAt(i, 1);
             if (maMon.equals(maMonTrongBang)) {
-                int soLuongMoi = (int) modelChiTietHoaDon.getValueAt(i, 3) + 1;
+                int soLuongCu  = (int) modelChiTietHoaDon.getValueAt(i, 3);
+                int soLuongMoi = soLuongCu + 1;
+                boolean ok = chiTietDAO.suaChiTiet(
+                        new ChiTietHoaDon(maMon, activeHoaDon.getMaDon(), soLuongMoi, donGia));
+                if (!ok) {
+                    JOptionPane.showMessageDialog(this, "Lỗi cập nhật số lượng vào CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 modelChiTietHoaDon.setValueAt(soLuongMoi, i, 3);
                 modelChiTietHoaDon.setValueAt(soLuongMoi * donGia, i, 5);
-                chiTietDAO.suaChiTiet(new ChiTietHoaDon(maMon, activeHoaDon.getMaDon(), soLuongMoi, donGia));
                 hoaDonDAO_GoiMon.capNhatTongTien(activeHoaDon.getMaHD(), tinhTongGocTuBang());
                 SocketManager.sendEvent(SocketEvent.ORDER_UPDATED, Map.of("maDon", activeHoaDon.getMaDon()));
                 updateBillPanelTotals();
@@ -286,8 +292,13 @@ public class ManHinhGoiMonGUI extends JPanel {
             }
         }
 
+        boolean ok = chiTietDAO.themChiTiet(
+                new ChiTietHoaDon(maMon, activeHoaDon.getMaDon(), 1, donGia));
+        if (!ok) {
+            JOptionPane.showMessageDialog(this, "Lỗi thêm món vào CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         modelChiTietHoaDon.addRow(new Object[]{"X", maMon, tenMon, Integer.valueOf(1), donGia, donGia});
-        chiTietDAO.themChiTiet(new ChiTietHoaDon(maMon, activeHoaDon.getMaDon(), 1, donGia));
         hoaDonDAO_GoiMon.capNhatTongTien(activeHoaDon.getMaHD(), tinhTongGocTuBang());
         SocketManager.sendEvent(SocketEvent.ORDER_UPDATED, Map.of("maDon", activeHoaDon.getMaDon()));
         updateBillPanelTotals();

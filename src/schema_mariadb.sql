@@ -156,6 +156,7 @@ CREATE TABLE ChiTietHoaDon (
     maMonAn VARCHAR(20) NOT NULL,
     soLuong INT NOT NULL,
     donGia DECIMAL(18, 2) NOT NULL,
+    trangThaiMon VARCHAR(20) NOT NULL DEFAULT 'Chờ',
     PRIMARY KEY (maDon, maMonAn),
     CONSTRAINT FK_ChiTiet_DonDatMon FOREIGN KEY (maDon) REFERENCES DonDatMon (maDon),
     CONSTRAINT FK_ChiTiet_MonAn FOREIGN KEY (maMonAn) REFERENCES MonAn (maMonAn)

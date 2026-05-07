@@ -42,18 +42,28 @@ public class SocketClient {
 
     public void connect() {
         Thread t = new Thread(() -> {
-            try {
-                Socket socket = new Socket(host, port);
-                connected = true;
-                out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String line;
-                while ((line = in.readLine()) != null) {
-                    SocketMessage msg = SocketMessage.fromLine(line);
-                    if (msg != null) notifyListeners(msg);
+            int delay = 2000;
+            while (!Thread.currentThread().isInterrupted()) {
+                try (Socket socket = new Socket(host, port)) {
+                    connected = true;
+                    delay = 2000;
+                    out = new PrintWriter(socket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        SocketMessage msg = SocketMessage.fromLine(line);
+                        if (msg != null) notifyListeners(msg);
+                    }
+                } catch (Exception e) {
+                    connected = false;
                 }
-            } catch (Exception e) {
-                connected = false;
+                try {
+                    Thread.sleep(delay);
+                    delay = Math.min(delay * 2, 30_000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
         }, "SocketClient-Read");
         t.setDaemon(true);

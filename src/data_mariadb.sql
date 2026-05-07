@@ -1,6 +1,11 @@
 -- =====================================================
 -- Seed data cho StarGuardianDB
 -- Password "admin123" → hash: hashed_-969161597
+--
+-- Migration cho DB đã tồn tại (chạy 1 lần):
+--   ALTER TABLE ChiTietHoaDon
+--       ADD COLUMN IF NOT EXISTS trangThaiMon VARCHAR(20) NOT NULL DEFAULT 'Chờ';
+--
 -- Migration fix (nếu DB cũ dùng 'Còn hàng'):
 --   UPDATE MonAn SET trangThai = 'Còn' WHERE trangThai = 'Còn hàng';
 -- =====================================================
@@ -12,7 +17,8 @@ USE StarGuardianDB;
 -- =====================================================
 INSERT IGNORE INTO TaiKhoan (tenTK, matKhau, trangThai) VALUES
   ('admin', 'hashed_-969161597', 1),
-  ('nv01',  'hashed_-969161597', 1);
+  ('nv01',  'hashed_-969161597', 1),
+  ('bep01', 'hashed_-969161597', 1);
 
 -- =====================================================
 -- CaLam
@@ -25,8 +31,9 @@ INSERT IGNORE INTO CaLam (maCa, tenCa, gioBatDau, gioKetThuc) VALUES
 -- NhanVien (phải insert TaiKhoan trước)
 -- =====================================================
 INSERT IGNORE INTO NhanVien (maNV, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, tenTK, vaiTro, email) VALUES
-  ('NV02001', 'Nguyễn Văn Admin', '1990-01-01', 'Nam',  '0901234567', 'TP. HCM', '2023-01-01', 15000000, 'admin', 'QUANLY',   'admin@starguardian.com'),
-  ('NV01002', 'Trần Thị Nhân Viên', '1995-05-15', 'Nữ', '0912345678', 'TP. HCM', '2023-06-01',  8000000, 'nv01',  'NHANVIEN', 'nv01@starguardian.com');
+  ('NV02001', 'Nguyễn Văn Admin',    '1990-01-01', 'Nam', '0901234567', 'TP. HCM', '2023-01-01', 15000000, 'admin', 'QUANLY',   'admin@starguardian.com'),
+  ('NV01002', 'Trần Thị Nhân Viên', '1995-05-15', 'Nữ',  '0912345678', 'TP. HCM', '2023-06-01',  8000000, 'nv01',  'NHANVIEN', 'nv01@starguardian.com'),
+  ('NV01003', 'Lê Văn Bếp',         '1998-03-20', 'Nam', '0923456789', 'TP. HCM', '2023-06-01',  7000000, 'bep01', 'NHANVIEN', 'bep01@starguardian.com');
 
 -- =====================================================
 -- DanhMucMon

@@ -234,12 +234,14 @@ public class MainGUI extends JFrame {
             menuItems.put("Khuyến mãi", "/img/icon/percent_discount.png");
             menuItems.put("Hóa đơn", "/img/icon/receipt_long.png");
             menuItems.put("Nhân viên", "/img/icon/group.png");
+            menuItems.put("Màn hình bếp", "/img/icon/dining.png");
         } else if ("NHANVIEN".equalsIgnoreCase(this.userRole)) {
             menuItems.put("Dashboard", "/img/icon/dashboard.png");
             menuItems.put("Danh sách bàn", "/img/icon/dine_lamp.png");
             menuItems.put("Thành viên", "/img/icon/diversity_3.png");
             menuItems.put("Lịch làm việc", "/img/icon/calendar_month.png");
             menuItems.put("Hóa đơn", "/img/icon/receipt_long.png");
+            menuItems.put("Màn hình bếp", "/img/icon/dining.png");
         }
         menuItems.put("Đăng xuất", "/img/icon/logout.png");
 
@@ -328,6 +330,7 @@ public class MainGUI extends JFrame {
 
         mainContentPanel.add(new LichLamViecGUI(vaiTroEnum), "Lịch làm việc");
         mainContentPanel.add(new HoaDonGUI(), "Hóa đơn");
+        mainContentPanel.add(new BepGUI(), "Màn hình bếp");
 
         if (VaiTro.QUANLY == vaiTroEnum) {
             mainContentPanel.add(new DanhMucMonGUI(), "Danh mục món ăn");

@@ -15,6 +15,9 @@ public class ChiTietHoaDon {
     @Column(name = "donGia", nullable = false)
     private float dongia;
 
+    @Column(name = "trangThaiMon", nullable = false, length = 20)
+    private String trangThaiMon = "Chờ";
+
     @Transient
     private float thanhtien;
 
@@ -79,6 +82,9 @@ public class ChiTietHoaDon {
         this.dongia = dongia;
         tinhThanhTien();
     }
+
+    public String getTrangThaiMon()              { return trangThaiMon; }
+    public void setTrangThaiMon(String v)        { this.trangThaiMon = v != null ? v : "Chờ"; }
 
     public float getThanhtien()                  { return thanhtien; }
 

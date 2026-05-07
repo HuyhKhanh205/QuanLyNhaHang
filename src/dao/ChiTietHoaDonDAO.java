@@ -30,17 +30,24 @@ public class ChiTietHoaDonDAO extends BaseDAO {
 
     public boolean themChiTiet(ChiTietHoaDon ct) {
         try {
-            inTransactionVoid(em -> em.persist(ct));
+            inTransactionVoid(em ->
+                em.createNativeQuery(
+                    "INSERT INTO ChiTietHoaDon(maDon, maMonAn, soLuong, donGia) VALUES(?,?,?,?)")
+                    .setParameter(1, ct.getMaDon())
+                    .setParameter(2, ct.getMaMon())
+                    .setParameter(3, ct.getSoluong())
+                    .setParameter(4, ct.getDongia())
+                    .executeUpdate());
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
     public boolean xoaChiTiet(String maDon, String maMon) {
         try {
-            inTransactionVoid(em -> {
-                ChiTietHoaDon c = em.find(ChiTietHoaDon.class, new ChiTietHoaDonId(maDon, maMon));
-                if (c != null) em.remove(c);
-            });
+            inTransactionVoid(em ->
+                em.createNativeQuery(
+                    "DELETE FROM ChiTietHoaDon WHERE maDon = ? AND maMonAn = ?")
+                    .setParameter(1, maDon).setParameter(2, maMon).executeUpdate());
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
@@ -51,6 +58,38 @@ public class ChiTietHoaDonDAO extends BaseDAO {
                 em.createNativeQuery("UPDATE ChiTietHoaDon SET soLuong = ? WHERE maDon = ? AND maMonAn = ?")
                         .setParameter(1, ct.getSoluong()).setParameter(2, ct.getMaDon())
                         .setParameter(3, ct.getMaMon()).executeUpdate());
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Object[]> getAllMonDangCho() {
+        EntityManager em = getEM();
+        try {
+            return em.createNativeQuery(
+                    "SELECT ct.maDon, ddm.maBan, b.tenBan, ct.maMonAn, m.tenMon, " +
+                    "ct.soLuong, ddm.ngayKhoiTao " +
+                    "FROM ChiTietHoaDon ct " +
+                    "JOIN DonDatMon ddm ON ct.maDon = ddm.maDon " +
+                    "JOIN Ban b ON ddm.maBan = b.maBan " +
+                    "JOIN MonAn m ON ct.maMonAn = m.maMonAn " +
+                    "WHERE b.trangThai = 'DANG_PHUC_VU' " +
+                    "AND ddm.trangThai = 'Chưa thanh toán' " +
+                    "AND ct.trangThaiMon = 'Chờ' " +
+                    "ORDER BY ddm.ngayKhoiTao, ddm.maBan")
+                    .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        } finally { em.close(); }
+    }
+
+    public boolean xacNhanMon(String maDon, String maMon) {
+        try {
+            inTransactionVoid(em ->
+                em.createNativeQuery(
+                    "UPDATE ChiTietHoaDon SET trangThaiMon = 'Đã lên' WHERE maDon = ? AND maMonAn = ?")
+                    .setParameter(1, maDon).setParameter(2, maMon).executeUpdate());
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
