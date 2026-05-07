@@ -53,10 +53,16 @@ public class ManHinhDatBanGUI extends JPanel {
     private DefaultListModel<DonDatMon> modelListPhieuDat;
 
     private static final Color COLOR_ACCENT_BLUE = new Color(56, 118, 243);
+    private String maNVDangNhap = "";
 
-    public ManHinhDatBanGUI(DanhSachBanGUI parent,MainGUI main) {
+    public ManHinhDatBanGUI(DanhSachBanGUI parent, MainGUI main) {
+        this(parent, main, "");
+    }
+
+    public ManHinhDatBanGUI(DanhSachBanGUI parent, MainGUI main, String maNVDangNhap) {
         this.parentDanhSachBanGUI_DatBan = parent;
         this.mainGUI_DatBan = main;
+        this.maNVDangNhap = (maNVDangNhap != null && !maNVDangNhap.isEmpty()) ? maNVDangNhap : "";
         banDAO = new BanDAO();
         khachHangDAO = new KhachHangDAO();
         donDatMonDAO = new DonDatMonDAO();
@@ -743,7 +749,8 @@ public class ManHinhDatBanGUI extends JPanel {
             entity.DonDatMon ddm = new entity.DonDatMon();
             ddm.setNgayKhoiTao(LocalDateTime.now());
             ddm.setThoiGianDen(thoiGianDat);
-            ddm.setMaNV("NV01102");
+            ddm.setTrangThai("Chưa thanh toán");
+            ddm.setMaNV(maNVDangNhap.isEmpty() ? "NV01002" : maNVDangNhap);
             ddm.setMaKH(maKHCanDung);
             ddm.setMaBan(ban.getMaBan());
 
@@ -803,10 +810,6 @@ public class ManHinhDatBanGUI extends JPanel {
             if (dsDatTruoc.isEmpty()) {
             } else {
                 for (entity.DonDatMon ddm : dsDatTruoc) {
-                    String tenHienThi = banDAO.getTenHienThiGhep(ddm.getMaBan());
-                    if (tenHienThi != null && !tenHienThi.isEmpty()) {
-                        ddm.setMaBan(tenHienThi);
-                    }
                     modelListPhieuDat.addElement(ddm);
                 }
             }
@@ -918,7 +921,8 @@ public class ManHinhDatBanGUI extends JPanel {
 
             if (value instanceof DonDatMon) {
                 DonDatMon ddm = value;
-                String tenBan = banDAO.getTenBanByMa(ddm.getMaBan());
+                String tenBan = banDAO.getTenHienThiGhep(ddm.getMaBan());
+                if (tenBan == null || tenBan.isEmpty()) tenBan = banDAO.getTenBanByMa(ddm.getMaBan());
                 KhachHang kh = (ddm.getMaKH() != null) ? khachHangDAO.timTheoMaKH(ddm.getMaKH()) : null;
                 String tenKH = (kh != null) ? kh.getTenKH() : "Vãng lai";
                 String sdtKH = (kh != null) ? kh.getSdt() : "--";

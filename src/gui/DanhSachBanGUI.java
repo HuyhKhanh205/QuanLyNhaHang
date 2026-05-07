@@ -140,7 +140,7 @@ public class DanhSachBanGUI extends JPanel implements ActionListener {
 
         manHinhBanGUI = new ManHinhBanGUI(this);
         manHinhGoiMonGUI = new ManHinhGoiMonGUI(this, this.maNVDangNhap);
-        manHinhDatBanGUI = new ManHinhDatBanGUI(this, mainGUI_Parent);
+        manHinhDatBanGUI = new ManHinhDatBanGUI(this, mainGUI_Parent, this.maNVDangNhap);
 
         contentCardPanel.add(manHinhBanGUI, "MAN_HINH_BAN");
         contentCardPanel.add(manHinhGoiMonGUI, "MAN_HINH_GOI_MON");
