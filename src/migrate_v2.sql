@@ -5,9 +5,10 @@
 
 USE StarGuardianDB;
 
--- 1. Thêm cột trangThaiMon vào ChiTietHoaDon
+-- 1. Thêm các cột mới vào ChiTietHoaDon
 ALTER TABLE ChiTietHoaDon
-    ADD COLUMN IF NOT EXISTS trangThaiMon VARCHAR(20) NOT NULL DEFAULT 'Chờ';
+    ADD COLUMN IF NOT EXISTS trangThaiMon VARCHAR(20) NOT NULL DEFAULT 'Chờ',
+    ADD COLUMN IF NOT EXISTS soLuongDaXacNhan INT NOT NULL DEFAULT 0;
 
 -- 2. Thêm tài khoản bếp để test
 INSERT IGNORE INTO TaiKhoan (tenTK, matKhau, trangThai) VALUES

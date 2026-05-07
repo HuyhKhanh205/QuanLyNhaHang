@@ -18,6 +18,9 @@ public class ChiTietHoaDon {
     @Column(name = "trangThaiMon", nullable = false, length = 20)
     private String trangThaiMon = "Chờ";
 
+    @Column(name = "soLuongDaXacNhan", nullable = false)
+    private int soLuongDaXacNhan = 0;
+
     @Transient
     private float thanhtien;
 

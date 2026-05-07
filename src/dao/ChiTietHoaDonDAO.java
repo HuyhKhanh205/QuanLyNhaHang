@@ -70,7 +70,7 @@ public class ChiTietHoaDonDAO extends BaseDAO {
         try {
             return em.createNativeQuery(
                     "SELECT ct.maDon, ddm.maBan, b.tenBan, ct.maMonAn, m.tenMon, " +
-                    "ct.soLuong, ddm.ngayKhoiTao " +
+                    "(ct.soLuong - ct.soLuongDaXacNhan) AS soLuongChoBep, ddm.ngayKhoiTao " +
                     "FROM ChiTietHoaDon ct " +
                     "JOIN DonDatMon ddm ON ct.maDon = ddm.maDon " +
                     "JOIN Ban b ON ddm.maBan = b.maBan " +
@@ -78,6 +78,7 @@ public class ChiTietHoaDonDAO extends BaseDAO {
                     "WHERE b.trangThai = 'DANG_PHUC_VU' " +
                     "AND ddm.trangThai = 'Chưa thanh toán' " +
                     "AND ct.trangThaiMon = 'Chờ' " +
+                    "AND (ct.soLuong - ct.soLuongDaXacNhan) > 0 " +
                     "ORDER BY ddm.ngayKhoiTao, ddm.maBan")
                     .getResultList();
         } catch (Exception e) {
@@ -90,7 +91,8 @@ public class ChiTietHoaDonDAO extends BaseDAO {
         try {
             inTransactionVoid(em ->
                 em.createNativeQuery(
-                    "UPDATE ChiTietHoaDon SET trangThaiMon = 'Đã lên' WHERE maDon = ? AND maMonAn = ?")
+                    "UPDATE ChiTietHoaDon SET trangThaiMon = 'Đã lên', soLuongDaXacNhan = soLuong " +
+                    "WHERE maDon = ? AND maMonAn = ?")
                     .setParameter(1, maDon).setParameter(2, maMon).executeUpdate());
             return true;
         } catch (Exception e) { e.printStackTrace(); return false; }
