@@ -1,7 +1,7 @@
 -- =====================================================
 -- Schema MariaDB cho StarGuardian Restaurant
 -- Lưu ý: TrangThaiBan dùng tên enum: TRONG, DANG_PHUC_VU, DA_DAT_TRUOC
---        VaiTro dùng tên enum: NHANVIEN, QUANLY
+--        VaiTro dùng tên enum: NHANVIEN, QUANLY, BEP
 -- =====================================================
 
 DROP DATABASE IF EXISTS StarGuardianDB;
@@ -19,7 +19,7 @@ USE StarGuardianDB;
 CREATE TABLE VaiTro (
     tenVaiTro VARCHAR(20) PRIMARY KEY
 );
-INSERT INTO VaiTro (tenVaiTro) VALUES ('NHANVIEN'), ('QUANLY');
+INSERT INTO VaiTro (tenVaiTro) VALUES ('NHANVIEN'), ('QUANLY'), ('BEP');
 
 CREATE TABLE HangThanhVien (
     tenHang VARCHAR(20) PRIMARY KEY

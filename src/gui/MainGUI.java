@@ -66,7 +66,7 @@ public class MainGUI extends JFrame {
         setupHelpShortcut();
 
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        showCard("Dashboard");
+        showCard("BEP".equalsIgnoreCase(this.userRole) ? "Màn hình bếp" : "Dashboard");
     }
 
     public MainGUI(String userRole, String userName) {
@@ -243,6 +243,8 @@ public class MainGUI extends JFrame {
             menuItems.put("Lịch làm việc", "/img/icon/calendar_month.png");
             menuItems.put("Hóa đơn", "/img/icon/receipt_long.png");
             menuItems.put("Màn hình bếp", "/img/icon/dining.png");
+        } else if ("BEP".equalsIgnoreCase(this.userRole)) {
+            menuItems.put("Màn hình bếp", "/img/icon/dining.png");
         }
         menuItems.put("Đăng xuất", "/img/icon/logout.png");
 
@@ -321,6 +323,11 @@ public class MainGUI extends JFrame {
     }
 
     private void setupMainContentPanel() {
+        if ("BEP".equalsIgnoreCase(this.userRole)) {
+            mainContentPanel.add(new BepGUI(), "Màn hình bếp");
+            return;
+        }
+
         if ("QUANLY".equalsIgnoreCase(this.userRole)) {
             mainContentPanel.add(new DashboardQuanLyGUI(), "Dashboard");
         } else {

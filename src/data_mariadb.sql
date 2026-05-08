@@ -33,7 +33,7 @@ INSERT IGNORE INTO CaLam (maCa, tenCa, gioBatDau, gioKetThuc) VALUES
 INSERT IGNORE INTO NhanVien (maNV, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, tenTK, vaiTro, email) VALUES
   ('NV02001', 'Nguyễn Văn Admin',    '1990-01-01', 'Nam', '0901234567', 'TP. HCM', '2023-01-01', 15000000, 'admin', 'QUANLY',   'admin@starguardian.com'),
   ('NV01002', 'Trần Thị Nhân Viên', '1995-05-15', 'Nữ',  '0912345678', 'TP. HCM', '2023-06-01',  8000000, 'nv01',  'NHANVIEN', 'nv01@starguardian.com'),
-  ('NV01003', 'Lê Văn Bếp',         '1998-03-20', 'Nam', '0923456789', 'TP. HCM', '2023-06-01',  7000000, 'bep01', 'NHANVIEN', 'bep01@starguardian.com');
+  ('NV01003', 'Lê Văn Bếp',         '1998-03-20', 'Nam', '0923456789', 'TP. HCM', '2023-06-01',  7000000, 'bep01', 'BEP',      'bep01@starguardian.com');
 
 -- =====================================================
 -- DanhMucMon

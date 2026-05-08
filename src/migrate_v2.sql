@@ -15,7 +15,7 @@ INSERT IGNORE INTO TaiKhoan (tenTK, matKhau, trangThai) VALUES
   ('bep01', 'hashed_-969161597', 1);
 
 INSERT IGNORE INTO NhanVien (maNV, hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, tenTK, vaiTro, email) VALUES
-  ('NV01003', 'Lê Văn Bếp', '1998-03-20', 'Nam', '0923456789', 'TP. HCM', '2023-06-01', 7000000, 'bep01', 'NHANVIEN', 'bep01@starguardian.com');
+  ('NV01003', 'Lê Văn Bếp', '1998-03-20', 'Nam', '0923456789', 'TP. HCM', '2023-06-01', 7000000, 'bep01', 'BEP', 'bep01@starguardian.com');
 
 -- Kiểm tra kết quả
 SELECT 'ChiTietHoaDon columns:' AS info;
