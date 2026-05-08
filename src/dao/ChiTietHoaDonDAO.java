@@ -52,6 +52,15 @@ public class ChiTietHoaDonDAO extends BaseDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+    public boolean xoaHetChiTietTheoMaDon(String maDon) {
+        try {
+            inTransactionVoid(em ->
+                em.createNativeQuery("DELETE FROM ChiTietHoaDon WHERE maDon = ?")
+                        .setParameter(1, maDon).executeUpdate());
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
     public boolean suaChiTiet(ChiTietHoaDon ct) {
         try {
             inTransactionVoid(em ->

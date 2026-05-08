@@ -241,8 +241,11 @@ public class ManHinhGoiMonGUI extends JPanel {
 
     private void dongBan() {
         if (activeHoaDon == null || banHienTai == null) return;
-        hoaDonDAO_GoiMon.xoaHoaDon(activeHoaDon.getMaHD());
-        donDatMonDAO.xoaDonDatMon(activeHoaDon.getMaDon());
+        String maDon = activeHoaDon.getMaDon();
+        String maHD  = activeHoaDon.getMaHD();
+        chiTietDAO.xoaHetChiTietTheoMaDon(maDon); // 1. xóa món (tránh FK block)
+        hoaDonDAO_GoiMon.xoaHoaDon(maHD);          // 2. xóa hóa đơn
+        donDatMonDAO.xoaDonDatMon(maDon);           // 3. xóa đơn (không còn child)
         banHienTai.setTrangThai(TrangThaiBan.TRONG);
         banHienTai.setGioMoBan(null);
         banDAO.updateBan(banHienTai);
