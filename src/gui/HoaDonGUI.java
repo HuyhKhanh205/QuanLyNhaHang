@@ -218,6 +218,10 @@ public class HoaDonGUI extends JPanel {
                 SwingUtilities.invokeLater(this::loadDataForCurrentPage));
     }
 
+    public void refresh() {
+        loadFirstPage();
+    }
+
     private void loadFirstPage() {
         currentPage = 1;
         currentKeyword = "";

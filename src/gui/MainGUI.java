@@ -32,6 +32,7 @@ public class MainGUI extends JFrame {
 
     private DanhSachBanGUI danhSachBanGUI;
     private KhachHangGUI khachHangGUI;
+    private HoaDonGUI hoaDonGUI;
 
     private final GiaoCaDAO giaoCaDAO = new GiaoCaDAO();
 
@@ -329,7 +330,8 @@ public class MainGUI extends JFrame {
         VaiTro vaiTroEnum = ("QUANLY".equalsIgnoreCase(this.userRole)) ? VaiTro.QUANLY : VaiTro.NHANVIEN;
 
         mainContentPanel.add(new LichLamViecGUI(vaiTroEnum), "Lịch làm việc");
-        mainContentPanel.add(new HoaDonGUI(), "Hóa đơn");
+        this.hoaDonGUI = new HoaDonGUI();
+        mainContentPanel.add(this.hoaDonGUI, "Hóa đơn");
         mainContentPanel.add(new BepGUI(), "Màn hình bếp");
 
         if (VaiTro.QUANLY == vaiTroEnum) {
@@ -349,5 +351,8 @@ public class MainGUI extends JFrame {
         if (currentActiveButton != null) currentActiveButton.setBackground(COLOR_ACCENT_BLUE);
         currentActiveButton = menuButtons.get(name);
         if (currentActiveButton != null) currentActiveButton.setBackground(COLOR_BUTTON_ACTIVE);
+        if ("Hóa đơn".equals(name) && hoaDonGUI != null) {
+            hoaDonGUI.refresh();
+        }
     }
 }
