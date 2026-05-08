@@ -256,13 +256,13 @@ public class ManHinhGoiMonGUI extends JPanel {
         }
     }
 
-    private float tinhTongGocTuBang() {
-        float tong = 0;
+    private double tinhTongGocTuBang() {
+        double tong = 0;
         for (int i = 0; i < modelChiTietHoaDon.getRowCount(); i++) {
             Object sl = modelChiTietHoaDon.getValueAt(i, 3);
             Object dg = modelChiTietHoaDon.getValueAt(i, 4);
             if (sl instanceof Number && dg instanceof Number)
-                tong += ((Number) sl).intValue() * ((Number) dg).floatValue();
+                tong += ((Number) sl).intValue() * ((Number) dg).doubleValue();
         }
         return tong;
     }
@@ -287,7 +287,7 @@ public class ManHinhGoiMonGUI extends JPanel {
 
         String maMon = monAn.getMaMonAn();
         String tenMon = monAn.getTenMon();
-        float donGia = monAn.getDonGia();
+        double donGia = monAn.getDonGia();
 
         for (int i = 0; i < modelChiTietHoaDon.getRowCount(); i++) {
             String maMonTrongBang = (String) modelChiTietHoaDon.getValueAt(i, 1);
@@ -339,10 +339,10 @@ public class ManHinhGoiMonGUI extends JPanel {
                 String maMon = (String) modelChiTietHoaDon.getValueAt(i, 1);
                 String tenMon = (String) modelChiTietHoaDon.getValueAt(i, 2);
                 Integer soLuong = (Integer) modelChiTietHoaDon.getValueAt(i, 3);
-                Float donGia = (Float) modelChiTietHoaDon.getValueAt(i, 4);
+                Double donGia = (Double) modelChiTietHoaDon.getValueAt(i, 4);
 
                 if (maMon != null && tenMon != null && soLuong != null && donGia != null) {
-                    ChiTietHoaDon ct = new ChiTietHoaDon(maDon, maMon, tenMon, soLuong.intValue(), donGia.floatValue());
+                    ChiTietHoaDon ct = new ChiTietHoaDon(maDon, maMon, tenMon, soLuong.intValue(), donGia.doubleValue());
                     dsChiTiet.add(ct);
                 }
             } catch (Exception e) {
@@ -523,8 +523,8 @@ public class ManHinhGoiMonGUI extends JPanel {
                     case 1: return String.class;
                     case 2: return String.class;
                     case 3: return Integer.class;
-                    case 4: return Float.class;
-                    case 5: return Float.class;
+                    case 4: return Double.class;
+                    case 5: return Double.class;
                     default: return Object.class;
                 }
             }
@@ -843,8 +843,8 @@ public class ManHinhGoiMonGUI extends JPanel {
 
                     if (editingRow < model.getRowCount()) {
                         int currentQuantity = (Integer) spinner.getValue();
-                        float donGia = (Float) model.getValueAt(editingRow, 4);
-                        float thanhTienMoi = currentQuantity * donGia;
+                        double donGia = (Double) model.getValueAt(editingRow, 4);
+                        double thanhTienMoi = currentQuantity * donGia;
                         final int row = editingRow;
 
                         SwingUtilities.invokeLater(() -> {

@@ -21,7 +21,7 @@ public class HoaDon {
     private LocalDateTime ngayLap;
 
     @Column(name = "tongTien", nullable = false)
-    private float tongTien;
+    private double tongTien;
 
     @Column(name = "trangThai", nullable = false, length = 50)
     private String trangThai;
@@ -30,7 +30,7 @@ public class HoaDon {
     private String hinhThucThanhToan;
 
     @Column(name = "tienKhachDua")
-    private float tienKhachDua;
+    private double tienKhachDua;
 
     @Column(name = "tenBan", length = 100)
     private String tenBan;
@@ -45,11 +45,11 @@ public class HoaDon {
     private String maKM;
 
     @Column(name = "giamGia")
-    private float giamGia;
+    private double giamGia;
 
     // Không có trong DB - tính toán / load từ DonDatMon
     @Transient private String maKH;
-    @Transient private float tongThanhToan;
+    @Transient private double tongThanhToan;
     @Transient private List<ChiTietHoaDon> dsChiTiet;
 
     public HoaDon() {
@@ -112,8 +112,8 @@ public class HoaDon {
 
     public void tinhLaiGiamGiaVaTongTien(KhachHangDAO khachHangDAO, KhuyenMaiDAO maKhuyenMaiDAO) {
         tinhLaiTongTienTuChiTiet();
-        float tongCong = this.tongTien;
-        float giamGiaTV = 0, giamGiaMa = 0;
+        double tongCong = this.tongTien;
+        double giamGiaTV = 0, giamGiaMa = 0;
         if (this.maKH != null && khachHangDAO != null) {
             KhachHang kh = khachHangDAO.timTheoMaKH(this.maKH);
             if (kh != null) giamGiaTV = tongCong * getPhanTramGiamTheoHang(kh.getHangThanhVien()) / 100;
@@ -122,34 +122,34 @@ public class HoaDon {
             KhuyenMai km = maKhuyenMaiDAO.getKhuyenMaiHopLeByMa(this.maKM);
             if (km != null && tongCong >= km.getDieuKienApDung()) {
                 if (km.getLoaiKhuyenMai().toLowerCase().contains("phần trăm"))
-                    giamGiaMa = tongCong * (float) km.getGiaTri() / 100;
+                    giamGiaMa = tongCong * km.getGiaTri() / 100;
                 else
-                    giamGiaMa = (float) km.getGiaTri();
+                    giamGiaMa = km.getGiaTri();
             }
         }
         this.giamGia = giamGiaTV + giamGiaMa;
         tinhLaiTongThanhToan();
     }
 
-    private float getPhanTramGiamTheoHang(HangThanhVien hang) {
-        if (hang == null) return 0f;
+    private double getPhanTramGiamTheoHang(HangThanhVien hang) {
+        if (hang == null) return 0;
         switch (hang) {
-            case DIAMOND: return 10f;
-            case GOLD:    return 5f;
-            case SILVER:  return 3f;
-            case BRONZE:  return 2f;
-            default:      return 0f;
+            case DIAMOND: return 10;
+            case GOLD:    return 5;
+            case SILVER:  return 3;
+            case BRONZE:  return 2;
+            default:      return 0;
         }
     }
 
-    public void setTienKhachDua(float tienKhachDua)         { this.tienKhachDua = tienKhachDua; }
-    public void setTongTienTuDB(float tongTien)             { this.tongTien = tongTien; }
+    public void setTienKhachDua(double tienKhachDua)         { this.tienKhachDua = tienKhachDua; }
+    public void setTongTienTuDB(double tongTien)             { this.tongTien = tongTien; }
     public void capNhatTongThanhToanTuCacThanhPhan() {
         this.tongThanhToan = this.tongTien - this.giamGia;
         if (this.tongThanhToan < 0) this.tongThanhToan = 0;
     }
     public void setMaKH(String maKH)                        { this.maKH = maKH; }
-    public float tinhTienThoi() {
+    public double tinhTienThoi() {
         return (this.tienKhachDua >= this.tongThanhToan) ? this.tienKhachDua - this.tongThanhToan : 0;
     }
 
@@ -159,18 +159,18 @@ public class HoaDon {
     public LocalDateTime getNgayLap()       { return ngayLap; }
     public String getTrangThai()            { return trangThai; }
     public String getHinhThucThanhToan()    { return hinhThucThanhToan; }
-    public float getTienKhachDua()          { return tienKhachDua; }
+    public double getTienKhachDua()          { return tienKhachDua; }
     public String getMaDon()                { return maDon; }
     public String getMaNV()                 { return maNV; }
     public String getMaKM()                 { return maKM; }
     public List<ChiTietHoaDon> getDsChiTiet() { return dsChiTiet; }
     public void setTenBan(String tenBan)    { this.tenBan = tenBan; }
-    public float getTongTien()              { return tongTien; }
-    public float getGiamGia()              { return giamGia; }
-    public float getTongThanhToan()        { return tongThanhToan; }
-    public float getTienThoi()             { return tinhTienThoi(); }
+    public double getTongTien()              { return tongTien; }
+    public double getGiamGia()              { return giamGia; }
+    public double getTongThanhToan()        { return tongThanhToan; }
+    public double getTienThoi()             { return tinhTienThoi(); }
     public void setMaKM(String maKM)       { this.maKM = maKM; }
-    public void setGiamGia(float giamGia)  { this.giamGia = (giamGia < 0) ? 0 : giamGia; }
+    public void setGiamGia(double giamGia)  { this.giamGia = (giamGia < 0) ? 0 : giamGia; }
     public void tinhLaiTongThanhToan() {
         this.tongThanhToan = this.tongTien - this.giamGia;
         if (this.tongThanhToan < 0) this.tongThanhToan = 0;

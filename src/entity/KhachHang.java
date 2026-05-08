@@ -27,7 +27,7 @@ public class KhachHang {
     private HangThanhVien hangThanhVien;
 
     @Column(name = "tongChiTieu", nullable = false)
-    private float tongChiTieu;
+    private double tongChiTieu;
 
     @Column(name = "ngaySinh")
     private LocalDate ngaySinh;
@@ -63,7 +63,7 @@ public class KhachHang {
 
     public KhachHang(String maKH, String tenKH, String gioitinh, String sdt,
                      LocalDate ngaySinh, String diaChi, String email, LocalDate ngayThamGia,
-                     float tongChiTieu, HangThanhVien hangThanhVien) {
+                     double tongChiTieu, HangThanhVien hangThanhVien) {
         setMaKH(maKH);
         setTenKH(tenKH);
         setGioitinh(gioitinh);
@@ -83,7 +83,7 @@ public class KhachHang {
     }
 
     public KhachHang(String maKH, String tenKH, String gioitinh, String sdt, String email,
-                     float tongChiTieu, HangThanhVien hang) {
+                     double tongChiTieu, HangThanhVien hang) {
         this.maKH = maKH;
         this.tenKH = tenKH;
         this.gioitinh = gioitinh;
@@ -117,7 +117,7 @@ public class KhachHang {
         if (!thanhVien) setHangThanhVien(HangThanhVien.NONE);
         else if (this.hangThanhVien == HangThanhVien.NONE) capNhatHangThanhVien();
     }
-    public void setTongChiTieu(float tongChiTieu) {
+    public void setTongChiTieu(double tongChiTieu) {
         if (tongChiTieu < 0) throw new IllegalArgumentException("Tổng chi tiêu phải >= 0");
         this.tongChiTieu = tongChiTieu;
         capNhatHangThanhVien();
@@ -132,7 +132,7 @@ public class KhachHang {
     public String getGioitinh()                 { return gioitinh; }
     public String getSdt()                      { return sdt; }
     public HangThanhVien getHangThanhVien()     { return hangThanhVien; }
-    public float getTongChiTieu()               { return tongChiTieu; }
+    public double getTongChiTieu()               { return tongChiTieu; }
     public LocalDate getNgaySinh()              { return ngaySinh; }
     public String getDiaChi()                   { return diaChi; }
     public LocalDate getNgayThamGia()           { return ngayThamGia; }
@@ -143,7 +143,7 @@ public class KhachHang {
     public void setNgayThamGia(LocalDate ngayThamGia)   { this.ngayThamGia = ngayThamGia; }
     public void setEmail(String email)                  { this.email = email; }
 
-    public float capNhatTongChiTieu(float soTien) {
+    public double capNhatTongChiTieu(double soTien) {
         if (soTien < 0) throw new IllegalArgumentException("Số tiền cộng thêm không hợp lệ");
         this.tongChiTieu += soTien;
         capNhatHangThanhVien();

@@ -52,7 +52,7 @@ public class KhachHangDAO extends BaseDAO {
         try {
             List<KhachHang> r = em.createQuery(
                     "FROM KhachHang k WHERE k.sdt = :sdt", KhachHang.class)
-                    .setParameter("sdt", sdt).getResultList();
+                    .setParameter("sdt", sdt).setMaxResults(1).getResultList();
             return r.isEmpty() ? null : r.get(0);
         } finally { em.close(); }
     }

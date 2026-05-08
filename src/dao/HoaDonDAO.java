@@ -41,11 +41,11 @@ public class HoaDonDAO extends BaseDAO {
     private HoaDon rowToHoaDon(Object[] r) {
         String maHD = r[0].toString();
         LocalDateTime ngayLap = ((java.sql.Timestamp) r[1]).toLocalDateTime();
-        float tongTien = ((Number) r[2]).floatValue();
+        double tongTien = ((Number) r[2]).doubleValue();
         String trangThai = r[3] != null ? r[3].toString() : "";
         String hinhThuc = r[4] != null ? r[4].toString() : null;
-        float tienKhach = r[5] != null ? ((Number) r[5]).floatValue() : 0;
-        float giamGia   = r[6] != null ? ((Number) r[6]).floatValue() : 0;
+        double tienKhach = r[5] != null ? ((Number) r[5]).doubleValue() : 0;
+        double giamGia   = r[6] != null ? ((Number) r[6]).doubleValue() : 0;
         String maNV  = r[7] != null ? r[7].toString() : null;
         String maKM  = r[8] != null ? r[8].toString() : null;
         String maDon = r[9] != null ? r[9].toString() : null;
@@ -133,7 +133,7 @@ public class HoaDonDAO extends BaseDAO {
                     "hd.tienKhachDua, hd.giamGia, hd.maNV, hd.maKM, hd.maDon, b.tenBan, ddm.maKH " +
                     "FROM HoaDon hd JOIN DonDatMon ddm ON hd.maDon = ddm.maDon " +
                     "LEFT JOIN Ban b ON ddm.maBan = b.maBan " +
-                    "WHERE ddm.maBan = ? AND hd.trangThai = 'Chưa thanh toán'")
+                    "WHERE ddm.maBan = ? AND hd.trangThai = 'Chưa thanh toán' ORDER BY hd.ngayLap DESC LIMIT 1")
                     .setParameter(1, maBan).getResultList();
             if (rows.isEmpty()) return null;
             Object[] r = rows.get(0);
@@ -169,7 +169,7 @@ public class HoaDonDAO extends BaseDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    public boolean capNhatTongTien(String maHD, float tongTienMoi) {
+    public boolean capNhatTongTien(String maHD, double tongTienMoi) {
         try {
             inTransactionVoid(em ->
                 em.createNativeQuery("UPDATE HoaDon SET tongTien = ? WHERE maHD = ?")

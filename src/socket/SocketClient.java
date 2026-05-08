@@ -4,10 +4,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 /**
@@ -24,7 +24,7 @@ public class SocketClient {
     private volatile boolean connected = false;
 
     private final Map<SocketEvent, List<Consumer<SocketMessage>>> listeners =
-            new EnumMap<>(SocketEvent.class);
+            new ConcurrentHashMap<>();
 
     private SocketClient(String host, int port) {
         this.host = host;
@@ -78,7 +78,7 @@ public class SocketClient {
     }
 
     public void subscribe(SocketEvent event, Consumer<SocketMessage> listener) {
-        listeners.computeIfAbsent(event, k -> new ArrayList<>()).add(listener);
+        listeners.computeIfAbsent(event, k -> new CopyOnWriteArrayList<>()).add(listener);
     }
 
     private void notifyListeners(SocketMessage msg) {

@@ -33,7 +33,7 @@ public class NhanVien {
     private LocalDate ngayvaolam;
 
     @Column(name = "luong", nullable = false)
-    private float luong;
+    private double luong;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vaiTro", nullable = false, length = 20)
@@ -153,8 +153,8 @@ public class NhanVien {
     public LocalDate getNgayvaolam() { return ngayvaolam; }
     public void setNgayvaolam(LocalDate ngayvaolam) { this.ngayvaolam = ngayvaolam; }
 
-    public float getLuong() { return luong; }
-    public void setLuong(float luong) {
+    public double getLuong() { return luong; }
+    public void setLuong(double luong) {
         if (luong <= 0) throw new IllegalArgumentException("Lương phải > 0");
         this.luong = luong;
     }

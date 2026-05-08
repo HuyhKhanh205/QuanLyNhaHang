@@ -35,12 +35,12 @@ public class MonAnDAO extends BaseDAO {
         } finally { em.close(); }
     }
 
-    public float getDonGiaByMa(String maMon) {
+    public double getDonGiaByMa(String maMon) {
         EntityManager em = getEM();
         try {
-            List<Float> r = em.createQuery("SELECT m.donGia FROM MonAn m WHERE m.maMonAn = :ma", Float.class)
+            List<Double> r = em.createQuery("SELECT m.donGia FROM MonAn m WHERE m.maMonAn = :ma", Double.class)
                     .setParameter("ma", maMon).getResultList();
-            return r.isEmpty() ? 0f : r.get(0);
+            return r.isEmpty() ? 0.0 : r.get(0);
         } finally { em.close(); }
     }
 

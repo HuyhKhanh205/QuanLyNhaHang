@@ -53,7 +53,7 @@ public class BanDAO extends BaseDAO {
         try {
             List<String> r = em.createQuery(
                     "SELECT b.tenBan FROM Ban b WHERE b.maBan = :ma", String.class)
-                    .setParameter("ma", maBan).getResultList();
+                    .setParameter("ma", maBan).setMaxResults(1).getResultList();
             return r.isEmpty() ? maBan : r.get(0);
         } finally {
             em.close();
@@ -243,7 +243,7 @@ public class BanDAO extends BaseDAO {
             String maBanMaster = maBanCheck;
 
             List<?> slave = em.createNativeQuery(
-                    "SELECT ghiChu FROM DonDatMon WHERE maBan = ? AND trangThai = 'Chưa thanh toán' AND ghiChu LIKE '%LINKED:%'")
+                    "SELECT ghiChu FROM DonDatMon WHERE maBan = ? AND trangThai = 'Chưa thanh toán' AND ghiChu LIKE '%LINKED:%' LIMIT 1")
                     .setParameter(1, maBanCheck).getResultList();
             if (!slave.isEmpty()) {
                 String ghiChu = slave.get(0).toString();
@@ -251,7 +251,7 @@ public class BanDAO extends BaseDAO {
                 if (idx != -1) maBanMaster = ghiChu.substring(idx + 7).trim().split(" ")[0];
             }
 
-            List<?> masterName = em.createNativeQuery("SELECT tenBan FROM Ban WHERE maBan = ?")
+            List<?> masterName = em.createNativeQuery("SELECT tenBan FROM Ban WHERE maBan = ? LIMIT 1")
                     .setParameter(1, maBanMaster).getResultList();
             if (!masterName.isEmpty()) tenGoc = masterName.get(0).toString();
 
@@ -276,7 +276,7 @@ public class BanDAO extends BaseDAO {
         EntityManager em = getEM();
         try {
             List<?> r = em.createNativeQuery(
-                    "SELECT ghiChu FROM DonDatMon WHERE maBan = ? AND trangThai = 'Chưa thanh toán' AND ghiChu LIKE 'LINKED:%'")
+                    "SELECT ghiChu FROM DonDatMon WHERE maBan = ? AND trangThai = 'Chưa thanh toán' AND ghiChu LIKE 'LINKED:%' LIMIT 1")
                     .setParameter(1, maBanCheck).getResultList();
             if (!r.isEmpty()) return r.get(0).toString().replace("LINKED:", "").trim();
             return maBanCheck;

@@ -13,7 +13,7 @@ public class ChiTietHoaDon {
     private int soluong;
 
     @Column(name = "donGia", nullable = false)
-    private float dongia;
+    private double dongia;
 
     @Column(name = "trangThaiMon", nullable = false, length = 20)
     private String trangThaiMon = "Chờ";
@@ -22,20 +22,20 @@ public class ChiTietHoaDon {
     private int soLuongDaXacNhan = 0;
 
     @Transient
-    private float thanhtien;
+    private double thanhtien;
 
     @Transient
     private String tenMon;
 
     public ChiTietHoaDon() {}
 
-    public ChiTietHoaDon(String maMon, String maDon, int soluong, float dongia) {
+    public ChiTietHoaDon(String maMon, String maDon, int soluong, double dongia) {
         this.id = new ChiTietHoaDonId(maDon, maMon);
         setDongia(dongia);
         setSoluong(soluong);
     }
 
-    public ChiTietHoaDon(String maDon, String maMon, String tenMon, int soluong, float dongia) {
+    public ChiTietHoaDon(String maDon, String maMon, String tenMon, int soluong, double dongia) {
         this.id = new ChiTietHoaDonId(maDon, maMon);
         this.tenMon = tenMon;
         setDongia(dongia);
@@ -79,8 +79,8 @@ public class ChiTietHoaDon {
         tinhThanhTien();
     }
 
-    public float getDongia()                     { return dongia; }
-    public void setDongia(float dongia) {
+    public double getDongia()                     { return dongia; }
+    public void setDongia(double dongia) {
         if (dongia < 0) throw new IllegalArgumentException("Đơn giá phải >= 0.");
         this.dongia = dongia;
         tinhThanhTien();
@@ -89,7 +89,7 @@ public class ChiTietHoaDon {
     public String getTrangThaiMon()              { return trangThaiMon; }
     public void setTrangThaiMon(String v)        { this.trangThaiMon = v != null ? v : "Chờ"; }
 
-    public float getThanhtien()                  { return thanhtien; }
+    public double getThanhtien()                  { return thanhtien; }
 
     @Override
     public String toString() {

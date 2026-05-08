@@ -351,10 +351,10 @@ public class BillPanel extends JPanel {
 
                     String tenMon = (String) model.getValueAt(i, 2);
                     Integer soLuong = (Integer) model.getValueAt(i, 3);
-                    Float donGia = (Float) model.getValueAt(i, 4);
+                    Double donGia = (Double) model.getValueAt(i, 4);
 
                     if (soLuong == null) soLuong = 1;
-                    if (donGia == null) donGia = 0f;
+                    if (donGia == null) donGia = 0.0;
 
                     ChiTietHoaDon ct = new ChiTietHoaDon(maDon, maMon, soLuong, donGia);
                     ct.setTenMon(tenMon);

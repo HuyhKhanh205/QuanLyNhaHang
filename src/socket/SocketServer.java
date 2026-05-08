@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +58,7 @@ public class SocketServer {
     }
 
     public void broadcast(String line) {
-        for (PrintWriter w : clients) {
+        for (PrintWriter w : new ArrayList<>(clients)) {
             try { w.println(line); } catch (Exception ignored) {}
         }
     }

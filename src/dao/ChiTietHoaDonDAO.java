@@ -22,7 +22,7 @@ public class ChiTietHoaDonDAO extends BaseDAO {
             for (Object[] r : rows) {
                 list.add(new ChiTietHoaDon(
                         r[0].toString(), r[1].toString(), r[2] != null ? r[2].toString() : "",
-                        ((Number) r[3]).intValue(), ((Number) r[4]).floatValue()));
+                        ((Number) r[3]).intValue(), ((Number) r[4]).doubleValue()));
             }
             return list;
         } finally { em.close(); }

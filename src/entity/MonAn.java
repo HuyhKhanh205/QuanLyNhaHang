@@ -17,7 +17,7 @@ public class MonAn {
     private String mota;
 
     @Column(name = "donGia", nullable = false)
-    private float donGia;
+    private double donGia;
 
     @Column(name = "donViTinh", nullable = false, length = 20)
     private String donViTinh;
@@ -42,7 +42,7 @@ public class MonAn {
         this.maDM = "";
     }
 
-    public MonAn(String maMonAn, String tenMon, String mota, float donGia,
+    public MonAn(String maMonAn, String tenMon, String mota, double donGia,
                  String donViTinh, String trangThai, String hinhAnh, String maDM) {
         this.maMonAn = maMonAn;
         this.tenMon = tenMon;
@@ -60,8 +60,8 @@ public class MonAn {
     public void setTenMon(String tenMon)    { this.tenMon = tenMon; }
     public String getMota()                 { return mota; }
     public void setMota(String mota)        { this.mota = mota; }
-    public float getDonGia()                { return donGia; }
-    public void setDonGia(float donGia)     { this.donGia = donGia; }
+    public double getDonGia()                { return donGia; }
+    public void setDonGia(double donGia)     { this.donGia = donGia; }
     public String getDonViTinh()            { return donViTinh; }
     public void setDonViTinh(String d)      { this.donViTinh = d; }
     public String getTrangThai()            { return trangThai; }
