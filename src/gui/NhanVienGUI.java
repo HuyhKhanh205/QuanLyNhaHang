@@ -3,7 +3,6 @@ package gui;
 import dao.NhanVienDAO;
 import dao.PhanCongDAO;
 import entity.NhanVien;
-import entity.VaiTro;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -13,7 +12,6 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class NhanVienGUI extends JPanel {
 
@@ -102,7 +100,21 @@ public class NhanVienGUI extends JPanel {
         table.setFont(new Font("Arial", Font.PLAIN, 14));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         table.getColumn("Xem chi tiết").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Xem chi tiết").setCellEditor(new ButtonEditor(new JCheckBox(), table));
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                int col = table.columnAtPoint(e.getPoint());
+                int row = table.rowAtPoint(e.getPoint());
+                if (row < 0) return;
+                int chiTietCol = table.getColumnModel().getColumnIndex("Xem chi tiết");
+                if (col == chiTietCol) {
+                    int modelRow = table.convertRowIndexToModel(row);
+                    String maNV = (String) model.getValueAt(modelRow, 4);
+                    ChiTietNhanVienDialog dialog = new ChiTietNhanVienDialog(NhanVienGUI.this, maNV);
+                    dialog.setVisible(true);
+                }
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -201,43 +213,4 @@ public class NhanVienGUI extends JPanel {
         }
     }
 
-    private class ButtonEditor extends DefaultCellEditor {
-        private final JButton button;
-        private final JTable table;
-        private boolean isPushed;
-        private int editingRow;
-
-        public ButtonEditor(JCheckBox checkBox, JTable table) {
-            super(checkBox);
-            this.table = table;
-            button = new JButton("Xem chi tiết >>");
-
-            button.addActionListener((ActionEvent e) -> {
-                fireEditingStopped();
-                int currentRow = table.convertRowIndexToModel(editingRow);
-                int maNVColumnIndex = table.getColumn("Xem chi tiết").getModelIndex();
-                String maNV = (String) table.getModel().getValueAt(currentRow, maNVColumnIndex);
-
-                ChiTietNhanVienDialog dialog = new ChiTietNhanVienDialog(NhanVienGUI.this, maNV);
-                dialog.setVisible(true);
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,boolean isSelected, int row, int column) {
-            isPushed = true;
-            this.editingRow = row;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (isPushed) {
-                int maNVColumnIndex = table.getColumn("Xem chi tiết").getModelIndex();
-                return table.getValueAt(editingRow, maNVColumnIndex);
-            }
-            isPushed = false;
-            return super.getCellEditorValue();
-        }
-    }
 }

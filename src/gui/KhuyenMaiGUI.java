@@ -54,6 +54,10 @@ public class KhuyenMaiGUI extends JPanel {
         addSearchAndFilterListeners();
     }
 
+    public void refresh() {
+        loadDataToTable();
+    }
+
     private void loadDataToTable() {
         List<KhuyenMai> ds = khuyenMaiDAO.getAllKhuyenMai();
         updateTable(ds);
@@ -66,7 +70,7 @@ public class KhuyenMaiGUI extends JPanel {
         if (ds == null) return;
 
         for (KhuyenMai km : dsKhuyenMai) {
-            String moTa = String.format("<html><b>%s</b><br>%s<br><i style='color:gray'>ĐK: >%.0f VNĐ</i></html>",
+            String moTa = String.format("<html><b>%s</b><br>%s<br><i style='color:gray'>ĐK: >%,.0f VNĐ</i></html>",
                     km.getTenChuongTrinh(),
                     generateMoTaGiaTri(km),
                     km.getDieuKienApDung());
@@ -92,9 +96,9 @@ public class KhuyenMaiGUI extends JPanel {
             case "Giảm theo phần trăm":
                 return String.format("Giảm %.0f%% hóa đơn", km.getGiaTri());
             case "Giảm giá số tiền":
-                return String.format("Giảm %.0f VNĐ", km.getGiaTri());
+                return String.format("Giảm %,.0f VNĐ", km.getGiaTri());
             default:
-                return km.getMoTa();
+                return km.getMoTa() != null ? km.getMoTa() : "";
         }
     }
 

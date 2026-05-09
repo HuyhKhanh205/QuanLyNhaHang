@@ -113,6 +113,7 @@ public class DashboardQuanLyGUI extends JPanel {
 
         setDefaultDateRange();
         loadDashboardData();
+        setupSocketListeners();
     }
 
     private JPanel createHeaderPanel() {
@@ -403,6 +404,37 @@ public class DashboardQuanLyGUI extends JPanel {
         LocalDate startOfRange = today.minusMonths(1);
         dateChooserStart.setDate(Date.from(startOfRange.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         dateChooserEnd.setDate(Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    }
+
+    private void setupSocketListeners() {
+        socket.SocketClient client = socket.SocketClient.getInstance();
+        if (client != null) {
+            client.subscribe(socket.SocketEvent.TABLE_STATUS_CHANGED, msg -> refreshRealtimeData());
+            client.subscribe(socket.SocketEvent.HOA_DON_THANH_TOAN, msg -> refreshRealtimeData());
+            client.subscribe(socket.SocketEvent.ORDER_CREATED, msg -> refreshRealtimeData());
+        }
+    }
+
+    private void refreshRealtimeData() {
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            private Map<String, Integer> tables;
+            private List<String> staff;
+            @Override
+            protected Void doInBackground() {
+                try {
+                    tables = banDAO.getTableStatusCounts();
+                    staff = giaoCaDAO.getNhanVienDangLamViecChiTiet();
+                } catch (Exception e) { e.printStackTrace(); }
+                return null;
+            }
+            @Override
+            protected void done() {
+                if (tables != null && staff != null) {
+                    updateRealtimeUI(tables, staff);
+                }
+            }
+        };
+        worker.execute();
     }
 
     private void loadDashboardData() {

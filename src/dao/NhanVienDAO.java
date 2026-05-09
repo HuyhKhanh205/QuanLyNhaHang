@@ -119,7 +119,10 @@ public class NhanVienDAO extends BaseDAO {
         try {
             List<?> r = em.createNativeQuery("SELECT trangThai FROM TaiKhoan WHERE tenTK = ?")
                     .setParameter(1, tenTK.trim()).getResultList();
-            return r.isEmpty() ? -1 : ((Number) r.get(0)).intValue();
+            if (r.isEmpty()) return -1;
+            Object val = r.get(0);
+            if (val instanceof Boolean) return ((Boolean) val) ? 1 : 0;
+            return ((Number) val).intValue();
         } finally { em.close(); }
     }
 }

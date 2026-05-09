@@ -248,9 +248,7 @@ public class BillPanel extends JPanel {
                 if (maKH != null && !maKH.trim().isEmpty()) {
                     KhachHang khachHang = khachHangDAO.timTheoMaKH(maKH);
                     if (khachHang != null && khachHang.getHangThanhVien() != entity.HangThanhVien.NONE) {
-                        float soTienCongThem = (float) tongThanhToanFinal;
-
-                        khachHang.capNhatTongChiTieu(soTienCongThem);
+                        khachHang.capNhatTongChiTieu(tongThanhToanFinal);
 
                         if (khachHangDAO.updateKhachHang(khachHang)) {
                             KhachHangGUI.reloadKhachHangTableIfAvailable();
@@ -303,9 +301,7 @@ public class BillPanel extends JPanel {
                 maKH = activeHoaDon.getMaKH();
 
                 if (maKM != null && !maKM.isEmpty()) {
-
-                    String maKHGhiNhan = (maKH != null) ? maKH : "KH_VANGLAI";
-                    maKhuyenMaiDAO.ghiNhanSuDung(maKM, maKHGhiNhan);
+                    maKhuyenMaiDAO.ghiNhanSuDung(maKM, maKH);
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Lỗi cập nhật CSDL!", "Lỗi CSDL", JOptionPane.ERROR_MESSAGE);
@@ -514,10 +510,23 @@ public class BillPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(textArea);
 
+        JButton btnPrint = new JButton("🖨 In phiếu");
+        btnPrint.setBackground(new Color(56, 118, 243));
+        btnPrint.setForeground(Color.WHITE);
+        btnPrint.setFocusPainted(false);
+        btnPrint.addActionListener(e -> {
+            try {
+                textArea.print(null, null, true, null, null, true);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(previewDialog, "Lỗi in: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         JButton btnClose = new JButton("Đóng");
         btnClose.addActionListener(e -> previewDialog.dispose());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(btnPrint);
         buttonPanel.add(btnClose);
 
         previewDialog.add(scrollPane, BorderLayout.CENTER);

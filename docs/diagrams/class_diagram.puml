@@ -1,0 +1,213 @@
+@startuml StarGuardian_ClassDiagram
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classBackgroundColor #EEF4FF
+skinparam classBorderColor #3876F3
+skinparam classHeaderBackgroundColor #3876F3
+skinparam classHeaderFontColor white
+skinparam arrowColor #333333
+skinparam linetype ortho
+hide empty methods
+
+title Sơ đồ lớp — StarGuardian Restaurant
+
+' ══════════════════════════════
+' ENUMS
+' ══════════════════════════════
+enum VaiTro {
+  NHANVIEN
+  QUANLY
+  BEP
+}
+
+enum TrangThaiBan {
+  TRONG
+  DANG_PHUC_VU
+  DA_DAT_TRUOC
+}
+
+enum HangThanhVien {
+  NONE
+  MEMBER
+  BRONZE
+  SILVER
+  GOLD
+  DIAMOND
+}
+
+' ══════════════════════════════
+' ENTITY CLASSES
+' ══════════════════════════════
+class TaiKhoan {
+  # tenTK : String <<PK>>
+  # matKhau : String
+  # trangThai : boolean
+}
+
+class NhanVien {
+  # maNV : String <<PK>>
+  # hoTen : String
+  # ngaySinh : LocalDate
+  # gioiTinh : String
+  # sdt : String <<UK>>
+  # diaChi : String
+  # ngayVaoLam : LocalDate
+  # luong : double
+  # tenTK : String <<FK>>
+  # vaiTro : VaiTro
+  # email : String <<UK>>
+}
+
+class KhachHang {
+  # maKH : String <<PK>>
+  # tenKH : String
+  # gioiTinh : String
+  # sdt : String <<UK>>
+  # hangThanhVien : HangThanhVien
+  # tongChiTieu : double
+  # ngaySinh : LocalDate
+  # diaChi : String
+  # ngayThamGia : LocalDate
+  # email : String <<UK>>
+}
+
+class Ban {
+  # maBan : String <<PK>>
+  # tenBan : String
+  # soGhe : int
+  # trangThai : TrangThaiBan
+  # gioMoBan : LocalDateTime
+  # khuVuc : String
+}
+
+class CaLam {
+  # maCa : String <<PK>>
+  # tenCa : String
+  # gioBatDau : LocalTime
+  # gioKetThuc : LocalTime
+}
+
+class PhanCong {
+  # maNV : String <<PK, FK>>
+  # maCa : String <<PK, FK>>
+  # ngayLam : LocalDate <<PK>>
+}
+
+class GiaoCa {
+  # maGiaoCa : int <<PK>>
+  # maNV : String <<FK>>
+  # thoiGianBatDau : LocalDateTime
+  # thoiGianKetThuc : LocalDateTime
+  # tienDauCa : double
+  # tienCuoiCa : double
+  # tienHeThongTinh : double
+  # chenhLech : double
+  # ghiChu : String
+}
+
+class DanhMucMon {
+  # maDM : String <<PK>>
+  # tenDM : String
+  # moTa : String
+}
+
+class MonAn {
+  # maMonAn : String <<PK>>
+  # tenMon : String
+  # moTa : String
+  # donGia : double
+  # donViTinh : String
+  # trangThai : String
+  # hinhAnh : String
+  # maDM : String <<FK>>
+}
+
+class KhuyenMai {
+  # maKM : String <<PK>>
+  # tenChuongTrinh : String
+  # moTa : String
+  # loaiKhuyenMai : String
+  # giaTri : double
+  # dieuKienApDung : double
+  # ngayBatDau : LocalDate
+  # ngayKetThuc : LocalDate
+  # trangThai : String
+  # soLuongGioiHan : int
+  # soLuotDaDung : int
+}
+
+class DonDatMon {
+  # maDon : String <<PK>>
+  # ngayKhoiTao : LocalDateTime
+  # thoiGianDen : LocalDateTime
+  # trangThai : String
+  # maNV : String <<FK>>
+  # maKH : String <<FK>>
+  # maBan : String <<FK>>
+  # ghiChu : String
+}
+
+class HoaDon {
+  # maHD : String <<PK>>
+  # ngayLap : LocalDateTime
+  # tongTien : double
+  # trangThai : String
+  # hinhThucThanhToan : String
+  # tienKhachDua : double
+  # giamGia : double
+  # tenBan : String
+  # maDon : String <<FK, UK>>
+  # maNV : String <<FK>>
+  # maKM : String <<FK>>
+}
+
+class ChiTietHoaDon {
+  # maDon : String <<PK, FK>>
+  # maMonAn : String <<PK, FK>>
+  # soLuong : int
+  # donGia : double
+  # trangThaiMon : String
+  # soLuongDaXacNhan : int
+}
+
+' ══════════════════════════════
+' RELATIONSHIPS
+' ══════════════════════════════
+
+' NhanVien — TaiKhoan (1:1)
+NhanVien "1" -- "1" TaiKhoan : tenTK >
+
+' NhanVien sử dụng enum VaiTro
+NhanVien ..> VaiTro : vaiTro
+
+' KhachHang sử dụng enum HangThanhVien
+KhachHang ..> HangThanhVien : hangThanhVien
+
+' Ban sử dụng enum TrangThaiBan
+Ban ..> TrangThaiBan : trangThai
+
+' PhanCong (*:1) NhanVien & CaLam
+NhanVien "1" <-- "*" PhanCong : maNV
+CaLam "1" <-- "*" PhanCong : maCa
+
+' GiaoCa (*:1) NhanVien
+NhanVien "1" <-- "*" GiaoCa : maNV
+
+' MonAn (*:1) DanhMucMon
+DanhMucMon "1" <-- "*" MonAn : maDM
+
+' DonDatMon (*:1) NhanVien, KhachHang, Ban
+NhanVien "1" <-- "*" DonDatMon : maNV
+KhachHang "0..1" <-- "*" DonDatMon : maKH
+Ban "0..1" <-- "*" DonDatMon : maBan
+
+' HoaDon (1:1) DonDatMon
+DonDatMon "1" <-- "1" HoaDon : maDon
+NhanVien "1" <-- "*" HoaDon : maNV
+KhuyenMai "0..1" <-- "*" HoaDon : maKM
+
+' ChiTietHoaDon (*:1) DonDatMon & MonAn
+DonDatMon "1" <-- "*" ChiTietHoaDon : maDon
+MonAn "1" <-- "*" ChiTietHoaDon : maMonAn
+
+@enduml

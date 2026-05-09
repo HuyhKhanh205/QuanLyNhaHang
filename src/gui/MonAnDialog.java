@@ -189,7 +189,7 @@ public class MonAnDialog extends JDialog {
                 throw new Exception("Đơn giá không được để trống!");
             }
 
-            float giaBan = Float.parseFloat(txtDonGia.getText().trim());
+            double giaBan = Double.parseDouble(txtDonGia.getText().trim());
 
             if (giaBan < 0) {
                 throw new Exception("Giá bán không được âm!");

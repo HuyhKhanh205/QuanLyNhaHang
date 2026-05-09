@@ -28,3 +28,11 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+###Targets###
+target/
+###DongGoi###
+*.jar
+*.war   
+*.bat
+DongGoi/
+TaiLieu/

@@ -1,0 +1,133 @@
+@startuml StarGuardian_UseCaseDiagram
+skinparam actorStyle awesome
+skinparam usecaseFontSize 12
+skinparam usecaseBackgroundColor #EEF4FF
+skinparam usecaseBorderColor #3876F3
+skinparam packageBackgroundColor #F8FBFF
+skinparam packageBorderColor #3876F3
+skinparam arrowColor #444444
+skinparam actorBorderColor #1F3864
+skinparam actorBackgroundColor #D6E4F0
+
+left to right direction
+title Sơ đồ Use Case — StarGuardian Restaurant
+
+' ══════════════════════════════
+' ACTORS
+' ══════════════════════════════
+actor "Nhân viên" as NV
+actor "Quản lý"   as QL
+actor "Nhân viên bếp" as BEP
+
+' ══════════════════════════════
+' USE CASES — NHÂN VIÊN
+' ══════════════════════════════
+rectangle "Hệ thống Quản lý Nhà hàng StarGuardian" {
+
+  package "Xác thực" {
+    usecase "UC_Login\nĐăng nhập" as UC_Login
+    usecase "UC_ForgotPW\nQuên mật khẩu" as UC_ForgotPW
+    usecase "UC_Logout\nĐăng xuất" as UC_Logout
+  }
+
+  package "Quản lý Bàn & Đặt chỗ" {
+    usecase "UC001\nTạo đặt bàn trước" as UC001
+    usecase "UC002\nGhép bàn" as UC002
+    usecase "UC003\nChuyển bàn" as UC003
+    usecase "UC_MoBan\nMở bàn\n(nhận khách)" as UC_MoBan
+    usecase "UC_DongBan\nĐóng bàn\n(hủy phục vụ)" as UC_DongBan
+  }
+
+  package "Gọi món & Bếp" {
+    usecase "UC007\nQuản lý gọi món\n(thêm / sửa / xóa)" as UC007
+    usecase "UC_GuiBep\nGửi bếp\n(Socket ORDER_UPDATED)" as UC_GuiBep
+    usecase "UC_XacNhanMon\nXác nhận món\n(Đã lên)" as UC_XacNhanMon
+  }
+
+  package "Thanh toán" {
+    usecase "UC004\nThanh toán hóa đơn" as UC004
+    usecase "UC_XemTamTinh\nXem tạm tính / In" as UC_XemTamTinh
+    usecase "UC_ApKM\nÁp dụng khuyến mãi" as UC_ApKM
+  }
+
+  package "Khách hàng thành viên" {
+    usecase "UC_ThanhVien\nQuản lý thành viên\n(thêm / sửa)" as UC_ThanhVien
+  }
+
+  package "Lịch làm việc & Ca" {
+    usecase "UC005\nPhân công ca\n(Quản lý)" as UC005
+    usecase "UC006\nXem lịch làm việc" as UC006
+    usecase "UC_BatDauCa\nBắt đầu ca\n(nhập tiền đầu ca)" as UC_BatDauCa
+    usecase "UC_KetThucCa\nKết thúc ca\n(kiểm tiền)" as UC_KetThucCa
+  }
+
+  package "Quản lý (Admin only)" {
+    usecase "UC008\nBáo cáo doanh thu\n(Dashboard)" as UC008
+    usecase "UC009\nQuản lý thực đơn\n(thêm / sửa / ẩn món)" as UC009
+    usecase "UC010\nQuản lý khuyến mãi" as UC010
+    usecase "UC_NhanVien\nQuản lý nhân viên" as UC_NhanVien
+  }
+
+  package "Hóa đơn" {
+    usecase "UC_HoaDon\nXem / lọc hóa đơn\n(Xuất Excel)" as UC_HoaDon
+  }
+}
+
+' ══════════════════════════════
+' ACTOR → USE CASE
+' ══════════════════════════════
+
+' Xác thực — tất cả
+NV  --> UC_Login
+QL  --> UC_Login
+BEP --> UC_Login
+NV  --> UC_ForgotPW
+QL  --> UC_ForgotPW
+BEP --> UC_ForgotPW
+NV  --> UC_Logout
+QL  --> UC_Logout
+BEP --> UC_Logout
+
+' Bàn & Đặt chỗ
+NV --> UC001
+NV --> UC002
+NV --> UC003
+NV --> UC_MoBan
+NV --> UC_DongBan
+
+' Gọi món
+NV --> UC007
+NV --> UC_GuiBep
+NV --> UC_XemTamTinh
+BEP --> UC_XacNhanMon
+
+' Thanh toán
+NV --> UC004
+UC004 ..> UC_ApKM : <<include>>
+UC004 ..> UC_XemTamTinh : <<extend>>
+
+' Thành viên
+NV --> UC_ThanhVien
+
+' Lịch làm & Ca
+QL  --> UC005
+NV  --> UC006
+QL  --> UC006
+NV  --> UC_BatDauCa
+NV  --> UC_KetThucCa
+
+' Quản lý admin
+QL --> UC008
+QL --> UC009
+QL --> UC010
+QL --> UC_NhanVien
+
+' Hóa đơn
+NV --> UC_HoaDon
+QL --> UC_HoaDon
+
+' Quan hệ include / extend
+UC007 ..> UC_GuiBep : <<include>>
+UC001 ..> UC_MoBan  : <<extend>>
+
+@enduml

@@ -33,6 +33,7 @@ public class MainGUI extends JFrame {
     private DanhSachBanGUI danhSachBanGUI;
     private KhachHangGUI khachHangGUI;
     private HoaDonGUI hoaDonGUI;
+    private KhuyenMaiGUI khuyenMaiGUI;
 
     private final GiaoCaDAO giaoCaDAO = new GiaoCaDAO();
 
@@ -343,7 +344,8 @@ public class MainGUI extends JFrame {
 
         if (VaiTro.QUANLY == vaiTroEnum) {
             mainContentPanel.add(new DanhMucMonGUI(), "Danh mục món ăn");
-            mainContentPanel.add(new KhuyenMaiGUI(), "Khuyến mãi");
+            this.khuyenMaiGUI = new KhuyenMaiGUI();
+            mainContentPanel.add(this.khuyenMaiGUI, "Khuyến mãi");
             mainContentPanel.add(new NhanVienGUI(), "Nhân viên");
         } else if (VaiTro.NHANVIEN == vaiTroEnum) {
             this.danhSachBanGUI = new DanhSachBanGUI(this, this.maNVDangNhap);
@@ -360,6 +362,9 @@ public class MainGUI extends JFrame {
         if (currentActiveButton != null) currentActiveButton.setBackground(COLOR_BUTTON_ACTIVE);
         if ("Hóa đơn".equals(name) && hoaDonGUI != null) {
             hoaDonGUI.refresh();
+        }
+        if ("Khuyến mãi".equals(name) && khuyenMaiGUI != null) {
+            khuyenMaiGUI.refresh();
         }
     }
 }

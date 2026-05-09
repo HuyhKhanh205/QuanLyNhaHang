@@ -96,8 +96,10 @@ public class KhuyenMaiDAO extends BaseDAO {
         inTransactionVoid(em -> {
             em.createNativeQuery("UPDATE KhuyenMai SET soLuotDaDung=soLuotDaDung+1 WHERE maKM=?")
                     .setParameter(1, maKM).executeUpdate();
-            em.createNativeQuery("INSERT INTO LichSuSuDungKM(maKH, maKM) VALUES(?,?)")
-                    .setParameter(1, maKH).setParameter(2, maKM).executeUpdate();
+            if (maKH != null && !maKH.isEmpty()) {
+                em.createNativeQuery("INSERT INTO LichSuSuDungKM(maKH, maKM) VALUES(?,?)")
+                        .setParameter(1, maKH).setParameter(2, maKM).executeUpdate();
+            }
             em.createNativeQuery("UPDATE KhuyenMai SET trangThai='Ngưng áp dụng' " +
                     "WHERE maKM=? AND soLuongGioiHan>0 AND soLuotDaDung>=soLuongGioiHan")
                     .setParameter(1, maKM).executeUpdate();

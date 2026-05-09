@@ -1,0 +1,156 @@
+@startuml StarGuardian_ScreenFlow
+skinparam linetype ortho
+left to right direction
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+' ── Màu theo vai trò (stereotype) ──────
+skinparam rectangle {
+  RoundCorner 8
+  FontColor   #1F3864
+}
+skinparam rectangle<<auth>> {
+  BackgroundColor #EEEEEE
+  BorderColor     #757575
+  FontColor       #1F3864
+}
+skinparam rectangle<<bep>> {
+  BackgroundColor #FFF3E0
+  BorderColor     #E65100
+  FontColor       #BF360C
+}
+skinparam rectangle<<ql>> {
+  BackgroundColor #DBEAFE
+  BorderColor     #1565C0
+  FontColor       #1F3864
+}
+skinparam rectangle<<ql_dlg>> {
+  BackgroundColor #EFF6FF
+  BorderColor     #3B82F6
+  FontColor       #1F3864
+}
+skinparam rectangle<<nv>> {
+  BackgroundColor #DCFCE7
+  BorderColor     #15803D
+  FontColor       #1F3864
+}
+skinparam rectangle<<nv_dlg>> {
+  BackgroundColor #F0FDF4
+  BorderColor     #4ADE80
+  FontColor       #1F3864
+}
+skinparam arrow {
+  Color     #555555
+  FontColor #444444
+  FontSize  10
+}
+
+' ═══════════════════════════════════════
+' KHAI BÁO RECTANGLE
+' ═══════════════════════════════════════
+
+' Xác thực
+rectangle "Đăng nhập\n(TaiKhoanGUI)"              <<auth>> as LOGIN
+rectangle "Quên mật khẩu\n(ForgotPasswordDialog)" <<auth>> as FORGOT
+
+' BEP
+rectangle "Màn hình Bếp\n(BepGUI)"                <<bep>>  as BEP_MAIN
+
+' QUANLY — màn hình chính
+rectangle "Dashboard Quản lý"                      <<ql>>   as QL_DASH
+rectangle "Quản lý Thực đơn"                       <<ql>>   as QL_MENU
+rectangle "Lịch làm việc + Phân ca"                <<ql>>   as QL_LICH
+rectangle "Quản lý Khuyến mãi"                     <<ql>>   as QL_KM
+rectangle "Quản lý Hóa đơn"                        <<ql>>   as QL_HD
+rectangle "Quản lý Nhân viên"                      <<ql>>   as QL_NV
+rectangle "Màn hình Bếp (QL)"                      <<ql>>   as QL_BEP
+
+' QUANLY — dialog
+rectangle "Thêm / Sửa món\n(MonAnDialog)"          <<ql_dlg>> as QL_MON
+rectangle "Quản lý danh mục\n(Dialog)"             <<ql_dlg>> as QL_DM
+rectangle "Phân công ca\n(AssignShiftDialog)"      <<ql_dlg>> as QL_CA
+rectangle "Thêm nhân viên\n(Dialog)"               <<ql_dlg>> as QL_THEM
+rectangle "Chi tiết nhân viên\n(Dialog)"           <<ql_dlg>> as QL_CT
+
+' NHANVIEN — màn hình chính
+rectangle "Dashboard Nhân viên"                    <<nv>>   as NV_DASH
+rectangle "Danh sách Bàn\n(DanhSachBanGUI)"        <<nv>>   as NV_BAN
+rectangle "Tab: BÀN\n(ManHinhBanGUI)"              <<nv>>   as NV_TAB_BAN
+rectangle "Tab: GỌI MÓN\n(ManHinhGoiMonGUI)"       <<nv>>   as NV_TAB_GOI
+rectangle "Tab: ĐẶT BÀN\n(ManHinhDatBanGUI)"       <<nv>>   as NV_TAB_DAT
+rectangle "Quản lý Thành viên\n(KhachHangGUI)"     <<nv>>   as NV_KH
+rectangle "Lịch làm việc (xem)"                    <<nv>>   as NV_LICH
+rectangle "Hóa đơn (xem + xuất Excel)"             <<nv>>   as NV_HD
+rectangle "Màn hình Bếp (NV)"                      <<nv>>   as NV_BEP
+
+' NHANVIEN — dialog
+rectangle "Ghép bàn\n(GhepBanDialog)"              <<nv_dlg>> as NV_GHEP
+rectangle "Chuyển bàn\n(ChuyenBanDialog)"          <<nv_dlg>> as NV_CHUYEN
+rectangle "Tạm tính / Thanh toán\n(BillPanel)"     <<nv_dlg>> as NV_BILL
+
+' ═══════════════════════════════════════
+' QUAN HỆ
+' ═══════════════════════════════════════
+
+LOGIN  --> FORGOT      : Quên mật khẩu?
+FORGOT --> LOGIN       : Xong / Đóng
+
+LOGIN  --> BEP_MAIN    : BEP
+LOGIN  --> QL_DASH     : QUANLY
+LOGIN  --> NV_DASH     : NHANVIEN
+
+BEP_MAIN --> LOGIN     : Đăng xuất
+
+QL_DASH  --> QL_MENU   : Danh mục món ăn
+QL_DASH  --> QL_LICH   : Lịch làm việc
+QL_DASH  --> QL_KM     : Khuyến mãi
+QL_DASH  --> QL_HD     : Hóa đơn
+QL_DASH  --> QL_NV     : Nhân viên
+QL_DASH  --> QL_BEP    : Màn hình bếp
+QL_DASH  --> LOGIN     : Đăng xuất
+
+QL_MENU  --> QL_MON    : Thêm / Điều chỉnh
+QL_MENU  --> QL_DM     : Quản lý danh mục
+QL_MON   --> QL_MENU   : Lưu / Hủy
+QL_DM    --> QL_MENU   : Lưu / Đóng
+
+QL_LICH  --> QL_CA     : Phân ca
+QL_CA    --> QL_LICH   : Lưu / Hủy
+
+QL_NV    --> QL_THEM   : Thêm nhân viên
+QL_NV    --> QL_CT     : Xem chi tiết
+QL_THEM  --> QL_NV     : Lưu / Hủy
+QL_CT    --> QL_NV     : Lưu / Đóng
+
+NV_DASH  --> NV_BAN    : Danh sách bàn
+NV_DASH  --> NV_KH     : Thành viên
+NV_DASH  --> NV_LICH   : Lịch làm việc
+NV_DASH  --> NV_HD     : Hóa đơn
+NV_DASH  --> NV_BEP    : Màn hình bếp
+NV_DASH  --> LOGIN     : Đăng xuất\n(kiểm tra kết ca)
+
+NV_BAN   --> NV_TAB_BAN : Tab Bàn (mặc định)
+NV_BAN   --> NV_TAB_GOI : Tab Gọi Món
+NV_BAN   --> NV_TAB_DAT : Tab Đặt Bàn
+
+NV_TAB_BAN --> NV_GHEP   : Ghép bàn
+NV_TAB_BAN --> NV_CHUYEN : Chuyển bàn
+NV_TAB_BAN --> NV_BILL   : Chọn bàn Đang phục vụ
+NV_TAB_GOI --> NV_BILL   : BillPanel tích hợp
+NV_GHEP    --> NV_TAB_BAN : Xong / Hủy
+NV_CHUYEN  --> NV_TAB_BAN : Xong / Hủy
+NV_BILL    --> NV_DASH    : Thanh toán xong / Đóng bàn
+
+' ═══════════════════════════════════════
+' CHÚ THÍCH
+' ═══════════════════════════════════════
+legend bottom
+  <back:#EEEEEE><color:#757575>  Xác thực (dùng chung)     </color></back>
+  <back:#FFF3E0><color:#E65100>  Nhân viên Bếp (BEP)        </color></back>
+  <back:#DBEAFE><color:#1565C0>  Quản lý — màn hình chính   </color></back>
+  <back:#EFF6FF><color:#3B82F6>  Quản lý — dialog / popup   </color></back>
+  <back:#DCFCE7><color:#15803D>  Nhân viên — màn hình chính </color></back>
+  <back:#F0FDF4><color:#4ADE80>  Nhân viên — dialog / popup </color></back>
+endlegend
+
+@enduml

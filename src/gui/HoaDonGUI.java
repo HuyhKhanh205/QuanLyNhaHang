@@ -666,12 +666,12 @@ public class HoaDonGUI extends JPanel {
         detailsText.append("<table border='1' cellpadding='5' cellspacing='0' style='border-collapse:collapse; width:100%; font-size: 10pt;'>");
         detailsText.append("<tr style='background-color:#f0f0f0;'><th>Mã Món</th><th>Tên Món</th><th>Số Lượng</th><th>Đơn Giá</th><th>Thành Tiền</th></tr>");
 
-        float tongTienChiTiet = 0;
+        double tongTienChiTiet = 0;
         for (ChiTietHoaDon ct : chiTietList) {
             if (ct == null) continue;
             String maMon = ct.getMaMon() != null ? ct.getMaMon() : "N/A";
             String tenMon = ct.getTenMon() != null ? ct.getTenMon() : monAnDAO.getTenMonByMa(maMon);
-            float thanhTien = ct.getThanhtien();
+            double thanhTien = ct.getThanhtien();
             tongTienChiTiet += thanhTien;
 
             detailsText.append("<tr>");

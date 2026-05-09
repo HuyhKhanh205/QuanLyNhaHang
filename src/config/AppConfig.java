@@ -9,9 +9,19 @@ public class AppConfig {
     private static final Properties props = new Properties();
 
     static {
-        try (InputStream in = AppConfig.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (in != null) {
-                props.load(in);
+        // Ưu tiên file bên cạnh JAR, fallback về classpath
+        java.io.File external = new java.io.File(
+                System.getProperty("user.dir"), "config.properties");
+        try {
+            if (external.exists()) {
+                try (InputStream in = new java.io.FileInputStream(external)) {
+                    props.load(in);
+                }
+            } else {
+                try (InputStream in = AppConfig.class.getClassLoader()
+                        .getResourceAsStream("config.properties")) {
+                    if (in != null) props.load(in);
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Không thể đọc config.properties", e);

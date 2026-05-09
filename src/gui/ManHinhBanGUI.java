@@ -385,7 +385,6 @@ public class ManHinhBanGUI extends JPanel {
 
         if (!sdt.isEmpty() && sdt.matches("\\d{10}")) {
             entity.KhachHang kh = khachHangDAO.timTheoSDT(sdt);
-            kh = khachHangDAO.timTheoSDT(sdt);
             if (kh != null) {
                 txtHoTenKhach.setText(kh.getTenKH());
                 txtThanhVien.setText(kh.getHangThanhVien().toString());
@@ -403,68 +402,6 @@ public class ManHinhBanGUI extends JPanel {
                 activeHoaDon.setMaKH(null);
                 donDatMonDAO.capNhatMaKH(activeHoaDon.getMaDon(), null);
             }
-        }
-    }
-
-    private void tinhVaCapNhatGiamGia(HoaDon hoaDon) {
-        if (hoaDon == null) return;
-
-        float tongCong = hoaDon.getTongTien();
-        float giamGiaTV = 0;
-        float giamGiaMa = 0;
-
-        if (hoaDon.getMaKH() != null) {
-            KhachHang kh = khachHangDAO.timTheoMaKH(hoaDon.getMaKH());
-            if (kh != null) {
-                float phanTramGiamTV = getPhanTramGiamTheoHang(kh.getHangThanhVien());
-                giamGiaTV = tongCong * phanTramGiamTV / 100;
-            }
-        }
-
-        if (hoaDon.getMaKM() != null && !hoaDon.getMaKM().isEmpty()) {
-            entity.KhuyenMai km = maKhuyenMaiDAO.getKhuyenMaiHopLeByMa(hoaDon.getMaKM());
-            if (km != null) {
-                if (tongCong >= km.getDieuKienApDung()) {
-                    if ("Phần trăm".equalsIgnoreCase(km.getLoaiKhuyenMai()) || "Giảm theo phần trăm".equalsIgnoreCase(km.getLoaiKhuyenMai())) {
-                        giamGiaMa = tongCong * (float) km.getGiaTri() / 100;
-                    } else if ("Số tiền".equalsIgnoreCase(km.getLoaiKhuyenMai()) || "Giảm giá số tiền".equalsIgnoreCase(km.getLoaiKhuyenMai())) {
-                        giamGiaMa = (float) km.getGiaTri();
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this, "Hóa đơn không đủ điều kiện (cần " + km.getDieuKienApDung() + "đ) để áp dụng mã " + hoaDon.getMaKM(), "Không đủ điều kiện", JOptionPane.WARNING_MESSAGE);
-                    hoaDon.setMaKM(null);
-                    txtMaKhuyenMai.setText("");
-                    hoaDonDAO.capNhatMaKM(hoaDon.getMaHD(), null);
-                }
-            } else {
-                hoaDon.setMaKM(null);
-                txtMaKhuyenMai.setText("");
-                hoaDonDAO.capNhatMaKM(hoaDon.getMaHD(), null);
-            }
-        }
-
-        float tongGiamGia = giamGiaTV + giamGiaMa;
-
-        hoaDon.setGiamGia(tongGiamGia);
-        hoaDon.tinhLaiTongThanhToan();
-    }
-
-    private float getPhanTramGiamTheoHang(HangThanhVien hang) {
-        if (hang == null) return 0.0f;
-        switch (hang) {
-            case DIAMOND:
-                return 10.0f;
-            case GOLD:
-                return 5.0f;
-            case SILVER:
-                return 3.0f;
-            case BRONZE:
-                return 2.0f;
-            case MEMBER:
-                return 0.0f;
-            case NONE:
-            default:
-                return 0.0f;
         }
     }
 
@@ -564,7 +501,6 @@ public class ManHinhBanGUI extends JPanel {
             txtNgayVao.setText(gioKhachHen != null ? gioKhachHen.format(dtfNgay) : "");
             txtGioVao.setText(gioKhachHen != null ? gioKhachHen.format(dtfGio) : "");
             txtSoLuongKhach.setText(String.valueOf(ban.getSoGhe()));
-            cmbPTThanhToan.setSelectedItem("Chưa thanh toán");
 
         } else if (ban.getTrangThai() == TrangThaiBan.DANG_PHUC_VU) {
             activeHoaDon = hoaDonDAO.getHoaDonChuaThanhToan(ban.getMaBan());

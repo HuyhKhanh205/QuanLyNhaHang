@@ -54,7 +54,7 @@ public class KhachHang {
         this.gioitinh = "Nam";
         this.sdt = "";
         this.hangThanhVien = HangThanhVien.MEMBER;
-        this.tongChiTieu = 0.0f;
+        this.tongChiTieu = 0.0;
         this.ngaySinh = LocalDate.of(2000, 1, 1);
         this.diaChi = "";
         this.ngayThamGia = LocalDate.now();

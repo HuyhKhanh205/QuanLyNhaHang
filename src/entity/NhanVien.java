@@ -54,18 +54,18 @@ public class NhanVien {
         this.sdt = "0000000000";
         this.diachi = "Chưa cập nhật";
         this.ngayvaolam = LocalDate.now();
-        this.luong = 2000000f;
+        this.luong = 2000000;
         this.tenTK = "";
         this.email = "example@starguardian.com";
     }
 
     public NhanVien(String hoTen, LocalDate ngaySinh, String gioiTinh, String sdt,
-                    String diaChi, LocalDate ngayVaoLam, float luong, VaiTro vaiTro, String email) {
+                    String diaChi, LocalDate ngayVaoLam, double luong, VaiTro vaiTro, String email) {
         this(hoTen, ngaySinh, gioiTinh, sdt, diaChi, ngayVaoLam, luong, vaiTro, "", email);
     }
 
     public NhanVien(String hoTen, LocalDate ngaySinh, String gioiTinh, String sdt,
-                    String diaChi, LocalDate ngayVaoLam, float luong, VaiTro vaiTro, String tenTK, String email) {
+                    String diaChi, LocalDate ngayVaoLam, double luong, VaiTro vaiTro, String tenTK, String email) {
         setVaiTro(vaiTro);
         this.manv = phatSinhMaNV(vaiTro);
         setHoten(hoTen);
@@ -80,7 +80,7 @@ public class NhanVien {
     }
 
     public NhanVien(String maNV, String hoTen, LocalDate ngaySinh, String gioiTinh, String sdt,
-                    String diaChi, LocalDate ngayVaoLam, float luong, VaiTro vaiTro, String email) {
+                    String diaChi, LocalDate ngayVaoLam, double luong, VaiTro vaiTro, String email) {
         this.manv = maNV;
         setVaiTro(vaiTro);
         setHoten(hoTen);

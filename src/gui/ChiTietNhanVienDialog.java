@@ -138,7 +138,7 @@ public class ChiTietNhanVienDialog extends JDialog {
             }
             String gioiTinh = (String) cmbGioiTinh.getSelectedItem();
             String sdt = txtSdt.getText().trim();
-            float luong = Float.parseFloat(txtLuong.getText().trim());
+            double luong = Double.parseDouble(txtLuong.getText().trim());
             String diaChi = txtDiaChi.getText().trim();
             VaiTro vaiTro = (VaiTro) cmbVaiTro.getSelectedItem();
             String email = txtEmail.getText().trim(); // Lấy giá trị Email mới

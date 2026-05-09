@@ -25,19 +25,19 @@ public class KhuyenMai {
     private double giaTri;
 
     @Column(name = "dieuKienApDung")
-    private double dieuKienApDung;
+    private Double dieuKienApDung = 0.0;
 
     @Column(name = "ngayBatDau", nullable = false)
     private LocalDate ngayBatDau;
 
-    @Column(name = "ngayKetThuc", nullable = false)
+    @Column(name = "ngayKetThuc", nullable = true)
     private LocalDate ngayKetThuc;
 
     @Column(name = "trangThai", nullable = false, length = 50)
     private String trangThai;
 
     @Column(name = "soLuongGioiHan")
-    private int soLuongGioiHan = 0;
+    private Integer soLuongGioiHan = 0;
 
     @Column(name = "soLuotDaDung", nullable = false)
     private int soLuotDaDung = 0;
@@ -64,13 +64,13 @@ public class KhuyenMai {
     public String getMoTa()                         { return moTa; }
     public String getLoaiKhuyenMai()                { return loaiKhuyenMai; }
     public double getGiaTri()                       { return giaTri; }
-    public double getDieuKienApDung()               { return dieuKienApDung; }
+    public double getDieuKienApDung()               { return dieuKienApDung == null ? 0.0 : dieuKienApDung; }
     public LocalDate getNgayBatDau()                { return ngayBatDau; }
     public LocalDate getNgayKetThuc()               { return ngayKetThuc; }
     public String getTrangThai()                    { return trangThai; }
     public void setTrangThai(String trangThai)      { this.trangThai = trangThai; }
-    public int getSoLuongGioiHan()                  { return soLuongGioiHan; }
-    public void setSoLuongGioiHan(int v)            { this.soLuongGioiHan = v; }
+    public int getSoLuongGioiHan()                  { return soLuongGioiHan == null ? 0 : soLuongGioiHan; }
+    public void setSoLuongGioiHan(Integer v)        { this.soLuongGioiHan = v; }
     public int getSoLuotDaDung()                    { return soLuotDaDung; }
     public void setSoLuotDaDung(int v)              { this.soLuotDaDung = v; }
 
